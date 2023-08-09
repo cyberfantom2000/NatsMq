@@ -1,6 +1,6 @@
 # NatsMq
 
-Cpp wrapper ower [cnats library](https://github.com/nats-io/nats.c).
+Cpp wrapper over the [official cnats library](https://github.com/nats-io/nats.c).
 
 - [Installing](#installing)
 - [Tests](#tests)
