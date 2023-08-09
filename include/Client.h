@@ -2,6 +2,7 @@
 
 #include <future>
 #include <memory>
+#include <optional>
 
 #include "Message.h"
 #include "Subscription.h"
