@@ -27,6 +27,7 @@ include(FetchContent)
 
 FetchContent_Declare(
   natsmq
+  GIT_TAG        main
   GIT_REPOSITORY https://github.com/cyberfantom2000/NatsMq.git
   GIT_SHALLOW    ON
 )
