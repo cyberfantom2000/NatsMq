@@ -233,6 +233,7 @@ namespace NatsMq
 
     enum class JsError
     {
+        NoJsError                   = 999,
         AccountResourcesExceededErr = 10002,       ///< Resource limits exceeded for account
         BadRequestErr,                             ///< Bad request
         ClusterIncompleteErr,                      ///< Incomplete results

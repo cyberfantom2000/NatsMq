@@ -46,6 +46,18 @@ namespace
     }
 
     using JsPubAckPtr = std::unique_ptr<jsPubAck, decltype(&jsPubAck_Destroy)>;
+
+    NatsMq::NatsMsgPtr createNatsMessageWithSwapException(const NatsMq::Message& msg)
+    {
+        try
+        {
+            return createNatsMessage(msg);
+        }
+        catch (const NatsMq::Exception& exc)
+        {
+            throw NatsMq::JsException(exc.status, NatsMq::JsError::NoJsError);
+        }
+    }
 }
 
 NatsMq::JsPublisher::JsPublisher(jsCtx* context)
@@ -56,7 +68,7 @@ NatsMq::JsPublisher::JsPublisher(jsCtx* context)
 NatsMq::JsPublishAck NatsMq::JsPublisher::publish(const Message& msg, const JsPublishOptions& options) const
 {
     auto natsOptions = toCnatsPublishOptions(options);
-    auto natsMsg     = createNatsMessage(msg);
+    auto natsMsg     = createNatsMessageWithSwapException(msg);
     return makePublish(natsMsg.get(), &natsOptions);
 }
 
@@ -71,13 +83,13 @@ void NatsMq::JsPublisher::waitPublishCompleted(int64_t timeout) const
     jsPubOptions natsOptions;
     jsPubOptions_Init(&natsOptions);
     natsOptions.MaxWait = timeout;
-    exceptionIfError(js_PublishAsyncComplete(_context, timeout < 0 ? nullptr : &natsOptions));
+    jsExceptionIfError(js_PublishAsyncComplete(_context, timeout < 0 ? nullptr : &natsOptions));
 }
 
 std::vector<NatsMq::Message> NatsMq::JsPublisher::getAsyncPendingMessages() const
 {
     natsMsgList pending;
-    exceptionIfError(js_PublishAsyncGetPendingList(&pending, _context));
+    jsExceptionIfError(js_PublishAsyncGetPendingList(&pending, _context));
 
     std::vector<Message> msgs;
     for (auto i = 0; i < pending.Count; ++i)
@@ -102,7 +114,7 @@ NatsMq::JsPublishAck NatsMq::JsPublisher::makePublish(natsMsg* msg, jsPubOptions
 
 NatsMq::JsPublishAck NatsMq::JsPublisher::makeAsyncPublish(const Message& msg, jsPubOptions* options) const
 {
-    auto natsMsgPtr = createNatsMessage(msg);
+    auto natsMsgPtr = createNatsMessageWithSwapException(msg);
     auto natsMsgRaw = natsMsgPtr.get();
-    exceptionIfError(js_PublishMsgAsync(_context, &natsMsgRaw, options));
+    jsExceptionIfError(js_PublishMsgAsync(_context, &natsMsgRaw, options));
 }

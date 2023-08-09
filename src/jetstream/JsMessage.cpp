@@ -19,17 +19,17 @@ void NatsMq::JsIncomingMessageImpl::ack() const
 void NatsMq::JsIncomingMessageImpl::nack(uint64_t delay) const
 {
     const auto status = delay ? natsMsg_NakWithDelay(_msg.get(), delay, nullptr) : natsMsg_Nak(_msg.get(), nullptr);
-    exceptionIfError(status);
+    jsExceptionIfError(status);
 }
 
 void NatsMq::JsIncomingMessageImpl::inProgress() const
 {
-    exceptionIfError(natsMsg_InProgress(_msg.get(), nullptr));
+    jsExceptionIfError(natsMsg_InProgress(_msg.get(), nullptr));
 }
 
 void NatsMq::JsIncomingMessageImpl::terminate() const
 {
-    exceptionIfError(natsMsg_Term(_msg.get(), nullptr));
+    jsExceptionIfError(natsMsg_Term(_msg.get(), nullptr));
 }
 
 NatsMq::JsIncomingMessage::JsIncomingMessage(JsIncomingMessageImpl* msg)

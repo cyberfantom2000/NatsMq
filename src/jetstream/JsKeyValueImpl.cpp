@@ -80,17 +80,16 @@ NatsMq::KeyValueStoreImpl* NatsMq::KeyValueStoreImpl::getOrCreate(jsCtx* context
             throw;
         kvStore* natsKv     = nullptr;
         auto     natsConfig = createNatsConfig(config);
-        exceptionIfError(js_CreateKeyValue(&natsKv, context, &natsConfig));
+        jsExceptionIfError(js_CreateKeyValue(&natsKv, context, &natsConfig));
         return new KeyValueStoreImpl(natsKv, context);
     }
 }
 
 NatsMq::KeyValueStoreImpl* NatsMq::KeyValueStoreImpl::get(jsCtx* context, const KeyValueConfig& config)
 {
-    kvStore*   kv     = nullptr;
-    const auto status = js_KeyValue(&kv, context, config.name.c_str());
+    kvStore* kv = nullptr;
 
-    exceptionIfError(status);
+    jsExceptionIfError(js_KeyValue(&kv, context, config.name.c_str()));
 
     KeyValueStorePtr kvPtr(kv, &kvStore_Destroy);
     return new KeyValueStoreImpl(kvPtr.release(), context);
@@ -99,7 +98,7 @@ NatsMq::KeyValueStoreImpl* NatsMq::KeyValueStoreImpl::get(jsCtx* context, const 
 void NatsMq::KeyValueStoreImpl::deleteStore() const
 {
     const auto name = storeName();
-    exceptionIfError(js_DeleteKeyValue(_context, name.c_str()));
+    jsExceptionIfError(js_DeleteKeyValue(_context, name.c_str()));
 }
 
 NatsMq::KeyValueStoreImpl::KeyValueStoreImpl(kvStore* kv, jsCtx* context)
@@ -116,7 +115,7 @@ std::string NatsMq::KeyValueStoreImpl::storeName() const
 std::vector<std::string> NatsMq::KeyValueStoreImpl::keys() const
 {
     kvKeysList list;
-    exceptionIfError(kvStore_Keys(&list, _kv.get(), nullptr));
+    jsExceptionIfError(kvStore_Keys(&list, _kv.get(), nullptr));
 
     std::vector<std::string> out;
     for (auto i = 0; i < list.Count; ++i)
@@ -129,7 +128,7 @@ std::vector<std::string> NatsMq::KeyValueStoreImpl::keys() const
 NatsMq::ByteArray NatsMq::KeyValueStoreImpl::getElement(const std::string& key) const
 {
     kvEntry* natsEntry = nullptr;
-    exceptionIfError(kvStore_Get(&natsEntry, _kv.get(), key.c_str()));
+    jsExceptionIfError(kvStore_Get(&natsEntry, _kv.get(), key.c_str()));
     KvEntryPtr entry(natsEntry, &kvEntry_Destroy);
 
     const auto data = reinterpret_cast<const char*>(kvEntry_Value(natsEntry));
@@ -138,20 +137,20 @@ NatsMq::ByteArray NatsMq::KeyValueStoreImpl::getElement(const std::string& key) 
 
 void NatsMq::KeyValueStoreImpl::putElement(const std::string& key, const ByteArray& value) const
 {
-    exceptionIfError(kvStore_Put(nullptr, _kv.get(), key.c_str(), value.constData(), static_cast<int>(value.size())));
+    jsExceptionIfError(kvStore_Put(nullptr, _kv.get(), key.c_str(), value.constData(), static_cast<int>(value.size())));
 }
 
 void NatsMq::KeyValueStoreImpl::createElement(const std::string& key, const ByteArray& value) const
 {
-    exceptionIfError(kvStore_Create(nullptr, _kv.get(), key.c_str(), value.constData(), static_cast<int>(value.size())));
+    jsExceptionIfError(kvStore_Create(nullptr, _kv.get(), key.c_str(), value.constData(), static_cast<int>(value.size())));
 }
 
 void NatsMq::KeyValueStoreImpl::purgeElement(const std::string& key) const
 {
-    exceptionIfError(kvStore_Purge(_kv.get(), key.c_str(), nullptr));
+    jsExceptionIfError(kvStore_Purge(_kv.get(), key.c_str(), nullptr));
 }
 
 void NatsMq::KeyValueStoreImpl::removeElement(const std::string& key) const
 {
-    exceptionIfError(kvStore_Delete(_kv.get(), key.c_str()));
+    jsExceptionIfError(kvStore_Delete(_kv.get(), key.c_str()));
 }

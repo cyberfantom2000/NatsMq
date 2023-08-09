@@ -13,7 +13,7 @@ NatsMq::Context::Context(natsConnection* connection, jsOptions* options)
     options->PublishAsync.ErrHandler        = &Context::asyncPublishErrorHandler;
     options->PublishAsync.ErrHandlerClosure = this;
 
-    exceptionIfError(natsConnection_JetStream(&natsContext, connection, options));
+    jsExceptionIfError(natsConnection_JetStream(&natsContext, connection, options));
     _context.reset(natsContext);
 }
 

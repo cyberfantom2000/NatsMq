@@ -8,7 +8,7 @@ namespace NatsMq
 {
     void exceptionIfError(int status);
 
-    void jsExceptionIfError(int status, int error);
+    void jsExceptionIfError(int status, int error = static_cast<int>(JsError::NoJsError));
 
     struct Exception : public std::runtime_error
     {
@@ -21,9 +21,9 @@ namespace NatsMq
 
     struct JsException final : public Exception
     {
-        JsException(Status, JsError);
+        JsException(Status s, JsError e);
 
-        JsException(int, int);
+        JsException(int s, int e);
 
         JsError jsError;
     };
