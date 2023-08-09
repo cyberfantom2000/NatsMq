@@ -44,11 +44,6 @@ NatsMq::KeyValueStore* NatsMq::JetStream::getStore(const KeyValueConfig& config)
     return new KeyValueStore(KeyValueStoreImpl::get(_context->rawContext(), config));
 }
 
-void NatsMq::JetStream::deleteStore(const std::string& name) const
-{
-    KeyValueStoreImpl::deleteStore(_context->rawContext(), name);
-}
-
 NatsMq::JetStream::JetStream(std::shared_ptr<Connection> connection, std::unique_ptr<Context> context)
     : _connection(connection)
     , _context(std::move(context))

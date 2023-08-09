@@ -26,6 +26,8 @@ namespace NatsMq
         //! Delete stream on server
         void remove() const;
 
+        bool exists() const;
+
     private:
         std::unique_ptr<JsStreamImpl> _impl;
     };

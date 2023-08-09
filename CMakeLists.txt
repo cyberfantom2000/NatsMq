@@ -6,8 +6,8 @@ project(NatsMq LANGUAGES CXX)
 
 option(NATSMQ_BUILD_TESTS "Build unit tests" ON)
 option(NATSMQ_BUILD_EXAMPLES "Build examples" ON)
-option(NATSMQ_USE_LIBEVENT "Use libevent library" OFF)
-option(NATSMQ_USE_LIBUV "Use libuv library" OFF)
+#option(NATSMQ_USE_LIBEVENT "Use libevent library" OFF)
+#option(NATSMQ_USE_LIBUV "Use libuv library" OFF)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

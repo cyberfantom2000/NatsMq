@@ -52,11 +52,11 @@ namespace
         try
         {
             cb(kv.get());
-            js->deleteStore(config.name);
+            kv->deleteStore();
         }
         catch (...)
         {
-            js->deleteStore(config.name);
+            kv->deleteStore();
             throw;
         }
     }
@@ -186,8 +186,8 @@ TEST(NatsMqJetStreamTesting, key_value_create_remove)
     const auto js     = createJetStream();
     const auto config = defautlKvConfig();
 
-    std::unique_ptr<KeyValueStore>(js->getOrCreateStore(config));
-    js->deleteStore(config.name);
+    std::unique_ptr<KeyValueStore> store(js->getOrCreateStore(config));
+    store->deleteStore();
 }
 
 TEST(NatsMqJetStreamTesting, key_value_create_element)

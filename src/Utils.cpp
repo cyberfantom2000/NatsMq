@@ -26,7 +26,7 @@ bool NatsMq::makePing(natsConnection* connection, int timeout)
     return status == Status::Ok;
 }
 
-bool NatsMq::configurePoolSize(int poolSize)
+void NatsMq::configurePoolSize(int poolSize)
 {
     if (poolSize > 1)
         nats_SetMessageDeliveryPoolSize(poolSize);
@@ -35,4 +35,12 @@ bool NatsMq::configurePoolSize(int poolSize)
 std::string NatsMq::emptyStringIfNull(const char* s)
 {
     return s ? s : "";
+}
+
+NatsMq::Message NatsMq::fromCnatsMessage(natsMsg* msg)
+{
+    NatsMq::Message out;
+    out.subject = natsMsg_GetSubject(msg);
+    out.reply   = NatsMq::emptyStringIfNull(natsMsg_GetReply(msg));
+    out.data    = NatsMq::ByteArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg));
 }

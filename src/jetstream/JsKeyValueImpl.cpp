@@ -26,6 +26,11 @@ NatsMq::KeyValueStore::KeyValueStore(KeyValueStoreImpl* impl)
 {
 }
 
+void NatsMq::KeyValueStore::deleteStore() const
+{
+    _impl->deleteStore();
+}
+
 NatsMq::KeyValueStore::~KeyValueStore() = default;
 
 std::string NatsMq::KeyValueStore::storeName() const
@@ -76,7 +81,7 @@ NatsMq::KeyValueStoreImpl* NatsMq::KeyValueStoreImpl::getOrCreate(jsCtx* context
         kvStore* natsKv     = nullptr;
         auto     natsConfig = createNatsConfig(config);
         exceptionIfError(js_CreateKeyValue(&natsKv, context, &natsConfig));
-        return new KeyValueStoreImpl(natsKv);
+        return new KeyValueStoreImpl(natsKv, context);
     }
 }
 
@@ -88,16 +93,18 @@ NatsMq::KeyValueStoreImpl* NatsMq::KeyValueStoreImpl::get(jsCtx* context, const 
     exceptionIfError(status);
 
     KeyValueStorePtr kvPtr(kv, &kvStore_Destroy);
-    return new KeyValueStoreImpl(kvPtr.release());
+    return new KeyValueStoreImpl(kvPtr.release(), context);
 }
 
-void NatsMq::KeyValueStoreImpl::deleteStore(jsCtx* context, const std::string& name)
+void NatsMq::KeyValueStoreImpl::deleteStore() const
 {
-    exceptionIfError(js_DeleteKeyValue(context, name.c_str()));
+    const auto name = storeName();
+    exceptionIfError(js_DeleteKeyValue(_context, name.c_str()));
 }
 
-NatsMq::KeyValueStoreImpl::KeyValueStoreImpl(kvStore* kv)
-    : _kv(kv, &kvStore_Destroy)
+NatsMq::KeyValueStoreImpl::KeyValueStoreImpl(kvStore* kv, jsCtx* context)
+    : _context(context)
+    , _kv(kv, &kvStore_Destroy)
 {
 }
 

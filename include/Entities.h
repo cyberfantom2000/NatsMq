@@ -350,6 +350,7 @@ namespace NatsMq
         StreamInfoMaxSubjectsErr,                  ///< Subject details would exceed maximum allowed
     };
 
+    struct Message;
     struct IncomingMessage;
     struct JsIncomingMessage;
 
@@ -357,5 +358,5 @@ namespace NatsMq
     using ErrorCb           = std::function<void(Status, const std::string&)>;
     using SubscriptionCb    = std::function<void(const IncomingMessage&)>;
     using JsSubscriptionCb  = std::function<void(const JsIncomingMessage&)>;
-    using JsAsyncErrorCb    = std::function<void(const JsIncomingMessage&, Status, JsError)>;
+    using JsAsyncErrorCb    = std::function<void(const Message&, Status, JsError)>;
 }

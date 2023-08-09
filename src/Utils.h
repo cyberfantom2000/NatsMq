@@ -15,7 +15,9 @@ namespace NatsMq
 
     bool makePing(natsConnection*, int timeout);
 
-    bool configurePoolSize(int poolSize);
+    void configurePoolSize(int poolSize);
 
     std::string emptyStringIfNull(const char* s);
+
+    NatsMq::Message fromCnatsMessage(natsMsg* msg);
 }

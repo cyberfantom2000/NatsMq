@@ -27,9 +27,6 @@ namespace NatsMq
 
         KeyValueStore* getStore(const KeyValueConfig& config) const;
 
-        //! Delete Key-Value store on NATS server
-        void deleteStore(const std::string& name) const;
-
         JsPublishAck publish(const Message& msg, const JsPublishOptions& options) const;
 
         JsPublishAck publish(const Message& msg, int64_t timeout = 2000) const;

@@ -19,10 +19,10 @@ namespace NatsMq
 
         void remove() const;
 
+        bool exists() const;
+
     private:
         JsStreamImpl(jsCtx* _context, const JsStreamConfig& config);
-
-        bool exists() const;
 
         void create() const;
 

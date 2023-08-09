@@ -5,14 +5,6 @@
 
 namespace
 {
-    NatsMq::Message fromCnatsMessage(natsMsg* msg)
-    {
-        NatsMq::Message out;
-        out.subject = natsMsg_GetSubject(msg);
-        out.reply   = NatsMq::emptyStringIfNull(natsMsg_GetReply(msg));
-        out.data    = NatsMq::ByteArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg));
-    }
-
     jsPubOptions toCnatsPublishOptions(const NatsMq::JsPublishOptions& options)
     {
         jsPubOptions natsOptions;

@@ -13,6 +13,8 @@ namespace NatsMq
 
         ~KeyValueStore();
 
+        void deleteStore() const;
+
         std::string storeName() const;
 
         std::vector<std::string> keys() const;

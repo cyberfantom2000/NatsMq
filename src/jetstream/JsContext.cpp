@@ -2,7 +2,8 @@
 
 #include "Exceptions.h"
 #include "JetStream.h"
-#include "JsMessage.h"
+#include "MessageImpl.h"
+#include "Utils.h"
 
 NatsMq::Context::Context(natsConnection* connection, jsOptions* options)
     : _context(nullptr, &jsCtx_Destroy)
@@ -31,7 +32,7 @@ void NatsMq::Context::asyncPublishErrorHandler(jsCtx*, jsPubAckErr* pae, void* c
     const auto context = reinterpret_cast<NatsMq::Context*>(closure);
     if (context && context->_errorCb)
     {
-        const auto impl = new NatsMq::JsIncomingMessageImpl(pae->Msg);
-        context->_errorCb(NatsMq::JsIncomingMessage(impl), static_cast<Status>(pae->Err), static_cast<JsError>(pae->ErrCode));
+        NatsMsgPtr msg(pae->Msg, &natsMsg_Destroy);
+        context->_errorCb(fromCnatsMessage(msg.get()), static_cast<Status>(pae->Err), static_cast<JsError>(pae->ErrCode));
     }
 }

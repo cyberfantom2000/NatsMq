@@ -15,7 +15,7 @@ namespace NatsMq
 
         static KeyValueStoreImpl* get(jsCtx* context, const KeyValueConfig& config);
 
-        static void deleteStore(jsCtx* context, const std::string& name);
+        void deleteStore() const;
 
         std::string storeName() const;
 
@@ -32,9 +32,10 @@ namespace NatsMq
         void removeElement(const std::string& key) const;
 
     private:
-        KeyValueStoreImpl(kvStore* kv);
+        KeyValueStoreImpl(kvStore* kv, jsCtx* context);
 
     private:
+        jsCtx*           _context;
         KeyValueStorePtr _kv;
     };
 }
