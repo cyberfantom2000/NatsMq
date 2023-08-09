@@ -42,6 +42,14 @@ target_link_libraries(${PROJECT_NAME} NatsMq)
 You can also add the project as a submodule or by any other means.
 On windows has a dependency on the winsock32 library. For build test required Qt5::Core and Qt5::Network.
 
+By default output files are stored in paths:
+```
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+```
+Don't forget to define them in your project.
+
 ## Tests
 To run the tests you will need to install server nats and python3. I recomend using [docker image](https://hub.docker.com/_/nats) for server. [Python3](https://www.python.org/downloads/) used for the second command line nats client and use only standart python libraries. Also test project used [GTEST framework](https://github.com/google/googletest). But this will be picked up automatically with cmake FetchContent.
 Start the NATS server first, then run a tests. For a JetStream tests, the server must be started with the flag ```--jetstream```.
