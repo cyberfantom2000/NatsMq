@@ -72,10 +72,10 @@ NatsMq::JsPublishAck NatsMq::JsPublisher::publish(const Message& msg, const JsPu
     return makePublish(natsMsg.get(), &natsOptions);
 }
 
-NatsMq::JsPublishAck NatsMq::JsPublisher::asyncPublish(const Message& msg, const JsPublishOptions& options) const
+void NatsMq::JsPublisher::asyncPublish(const Message& msg, const JsPublishOptions& options) const
 {
     auto natsOptions = toCnatsPublishOptions(options);
-    return makeAsyncPublish(msg, &natsOptions);
+    makeAsyncPublish(msg, &natsOptions);
 }
 
 void NatsMq::JsPublisher::waitPublishCompleted(int64_t timeout) const
@@ -112,7 +112,7 @@ NatsMq::JsPublishAck NatsMq::JsPublisher::makePublish(natsMsg* msg, jsPubOptions
     return toPublishAck(rawAck);
 }
 
-NatsMq::JsPublishAck NatsMq::JsPublisher::makeAsyncPublish(const Message& msg, jsPubOptions* options) const
+void NatsMq::JsPublisher::makeAsyncPublish(const Message& msg, jsPubOptions* options) const
 {
     auto natsMsgPtr = createNatsMessageWithSwapException(msg);
     auto natsMsgRaw = natsMsgPtr.get();

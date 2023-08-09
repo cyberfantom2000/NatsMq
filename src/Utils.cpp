@@ -43,4 +43,5 @@ NatsMq::Message NatsMq::fromCnatsMessage(natsMsg* msg)
     out.subject = natsMsg_GetSubject(msg);
     out.reply   = NatsMq::emptyStringIfNull(natsMsg_GetReply(msg));
     out.data    = NatsMq::ByteArray(natsMsg_GetData(msg), natsMsg_GetDataLength(msg));
+    return out;
 }

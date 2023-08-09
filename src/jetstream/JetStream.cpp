@@ -73,17 +73,17 @@ void NatsMq::JetStream::registerAsyncErrorHandler(JsAsyncErrorCb&& errorHandler)
     _context->registerAsyncErrorHandler(std::move(errorHandler));
 }
 
-NatsMq::JsPublishAck NatsMq::JetStream::asyncPublish(const Message& msg, int64_t timeout) const
+void NatsMq::JetStream::asyncPublish(const Message& msg, int64_t timeout) const
 {
     JsPublishOptions options;
     options.timeout = timeout;
-    return asyncPublish(msg, options);
+    asyncPublish(msg, options);
 }
 
-NatsMq::JsPublishAck NatsMq::JetStream::asyncPublish(const Message& msg, const JsPublishOptions& options) const
+void NatsMq::JetStream::asyncPublish(const Message& msg, const JsPublishOptions& options) const
 {
     JsPublisher publisher(_context->rawContext());
-    return publisher.asyncPublish(msg, options);
+    publisher.asyncPublish(msg, options);
 }
 
 void NatsMq::JetStream::waitAsyncPublishCompleted(int64_t timeout) const

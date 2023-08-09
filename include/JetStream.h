@@ -36,9 +36,9 @@ namespace NatsMq
 
         void registerAsyncErrorHandler(JsAsyncErrorCb&& errorHandler) const;
 
-        JsPublishAck asyncPublish(const Message& msg, int64_t timeout = 2000) const;
+        void asyncPublish(const Message& msg, int64_t timeout = 2000) const;
 
-        JsPublishAck asyncPublish(const Message& msg, const JsPublishOptions& options) const;
+        void asyncPublish(const Message& msg, const JsPublishOptions& options) const;
 
         //! Wait until all asynchronously published messages
         void waitAsyncPublishCompleted(int64_t timeout = -1) const;

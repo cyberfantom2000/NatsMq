@@ -4,8 +4,6 @@ if(NOT NATSMQ_BUILD_EXAMPLES)
   return()
 endif()
 
-include(FetchContent)
-
 project(NatsMqExamples LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)

@@ -270,7 +270,7 @@ try
 
     js->registerAsyncErrorHandler(std::move(cb));
 
-    ack = js->asyncPublish(Message("async_subject", "async_data"));
+    js->asyncPublish(Message("async_subject", "async_data"));
 
     // you can wait until all msg has ack
     int waitTimoutMs = 5000;

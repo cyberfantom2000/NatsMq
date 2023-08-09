@@ -15,7 +15,7 @@ namespace NatsMq
 
         JsPublishAck publish(const Message& msg, const JsPublishOptions& options) const;
 
-        JsPublishAck asyncPublish(const Message& msg, const JsPublishOptions& options) const;
+        void asyncPublish(const Message& msg, const JsPublishOptions& options) const;
 
         void waitPublishCompleted(int64_t timeout) const;
 
@@ -24,7 +24,7 @@ namespace NatsMq
     private:
         JsPublishAck makePublish(natsMsg* msg, jsPubOptions* options) const;
 
-        JsPublishAck makeAsyncPublish(const Message& msg, jsPubOptions* options) const;
+        void makeAsyncPublish(const Message& msg, jsPubOptions* options) const;
 
     private:
         jsCtx* _context;

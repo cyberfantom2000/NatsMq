@@ -53,7 +53,7 @@ void NatsMq::JsStream::remove() const
 
 bool NatsMq::JsStream::exists() const
 {
-    _impl->exists();
+    return _impl->exists();
 }
 
 NatsMq::JsStreamImpl* NatsMq::JsStreamImpl::getOrCreate(jsCtx* context, const JsStreamConfig& config)
