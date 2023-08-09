@@ -13,8 +13,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB examples_src RELATIVE ${PROJECT_SOURCE_DIR}/examples *.cpp)
 
-find_package(Qt5 REQUIRED COMPONENTS Core)
-
 foreach(src ${examples_src})
 
     string(REPLACE ".cpp" "" example_name ${src})
@@ -22,6 +20,6 @@ foreach(src ${examples_src})
     set(example_exe "natsmq-${example_name}")
 
     add_executable(${example_exe} "${PROJECT_SOURCE_DIR}/examples/${src}")
-    target_link_libraries(${example_exe} NatsMq Qt::Core)
+    target_link_libraries(${example_exe} NatsMq)
 
 endforeach()
