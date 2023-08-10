@@ -57,13 +57,12 @@ namespace NatsMq
         SendAsap,                ///< bool
         DisableNoResponders,     ///< bool
         UseGlobalMsgDelivery,    ///< bool
-        SkipServerVerification,  ///< bool
         FailRequestOnDisconnect, ///< bool
         MaxPingsOut,             ///< int
         IOBufferSize,            ///< int
         ReconnectBufferSize,     ///< int
         MaxPendingMessages,      ///< int
-        Timeout,          ///< int64_t
+        Timeout,                 ///< int64_t
         PingInterval,            ///< int64_t
         ReconnectWait,           ///< int64_t
         Name,                    ///< std::string

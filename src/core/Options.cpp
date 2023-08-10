@@ -26,7 +26,6 @@ namespace
         NatsMq::exceptionIfError(natsOptions_SetRetryOnFailedConnect(opts, true, nullptr, nullptr));
         NatsMq::exceptionIfError(natsOptions_SetSendAsap(opts, false));
         NatsMq::exceptionIfError(natsOptions_UseGlobalMessageDelivery(opts, true));
-        NatsMq::exceptionIfError(natsOptions_SkipServerVerification(opts, false));
         NatsMq::exceptionIfError(natsOptions_SetFailRequestsOnDisconnect(opts, false));
         return opts;
     }
@@ -98,11 +97,6 @@ void NatsMq::Options::set(Option opt, const OptionValue& val)
         case Option::UseGlobalMsgDelivery:
         {
             status = natsOptions_UseGlobalMessageDelivery(rawOptions, std::get<bool>(val));
-            break;
-        }
-        case Option::SkipServerVerification:
-        {
-            status = natsOptions_SkipServerVerification(rawOptions, std::get<bool>(val));
             break;
         }
         case Option::FailRequestOnDisconnect:

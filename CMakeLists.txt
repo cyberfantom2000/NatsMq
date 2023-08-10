@@ -56,7 +56,7 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
 
-GENERATE_EXPORT_HEADER(${PROJECT_NAME} EXPORT_FILE_NAME ${CMAKE_SOURCE_DIR}/include/natsmq_export.h)
+GENERATE_EXPORT_HEADER(${PROJECT_NAME} EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/natsmq_export.h)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
