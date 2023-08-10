@@ -6,7 +6,7 @@ using namespace NatsMq;
 
 int main()
 {
-    std::unique_ptr<Client> client(Client::configureAndCreate());
+    std::unique_ptr<Client> client(Client::create());
 
     try
     {

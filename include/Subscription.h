@@ -2,12 +2,13 @@
 
 #include "Entities.h"
 #include "Message.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
     class SubscriptionImpl;
 
-    class Subscription
+    class NATSMQ_EXPORT Subscription
     {
     public:
         Subscription(SubscriptionImpl*);
@@ -29,7 +30,7 @@ namespace NatsMq
 
     class JsSubscriptionImpl;
 
-    class JsSubscription
+    class NATSMQ_EXPORT JsSubscription
     {
     public:
         JsSubscription() = default;
@@ -51,7 +52,7 @@ namespace NatsMq
 
     class JsPullSubscriptionImpl;
 
-    class JsPullSubscription
+    class NATSMQ_EXPORT JsPullSubscription
     {
     public:
         JsPullSubscription() = default;

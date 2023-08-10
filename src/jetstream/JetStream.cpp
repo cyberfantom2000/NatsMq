@@ -22,6 +22,10 @@ NatsMq::JetStream* NatsMq::JetStream::configureAndCreate(std::shared_ptr<Connect
 
 NatsMq::JetStream::~JetStream() = default;
 
+NatsMq::JetStream::JetStream(JetStream&&) = default;
+
+NatsMq::JetStream& NatsMq::JetStream::operator=(JetStream&&) = default;
+
 NatsMq::JsStream* NatsMq::JetStream::getOrCreateStream(const JsStreamConfig& config) const
 {
     return new JsStream(JsStreamImpl::getOrCreate(_context->rawContext(), config));

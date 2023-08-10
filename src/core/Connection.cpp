@@ -9,34 +9,6 @@ using namespace NatsMq;
 
 namespace
 {
-    using NatsOptionsPtr = std::unique_ptr<natsOptions, decltype(&natsOptions_Destroy)>;
-
-    natsOptions* createNatsOptions(const Options& options)
-    {
-        natsOptions* nats_opts;
-        natsOptions_Create(&nats_opts);
-        exceptionIfError(natsOptions_SetUserInfo(nats_opts, options.user.c_str(), options.password.c_str()));
-        exceptionIfError(natsOptions_SetToken(nats_opts, options.token.c_str()));
-        exceptionIfError(natsOptions_SetNoRandomize(nats_opts, !options.randomize)); //NB! reverted flag
-        exceptionIfError(natsOptions_SetTimeout(nats_opts, options.timeout));
-        exceptionIfError(natsOptions_SetName(nats_opts, options.name.c_str()));
-        // postpone until I have SSL
-        // natsOptions_SetSecure(nats_opts, secure);
-        exceptionIfError(natsOptions_SetVerbose(nats_opts, options.verbose));
-        exceptionIfError(natsOptions_SetPedantic(nats_opts, options.pedantic));
-        exceptionIfError(natsOptions_SetPingInterval(nats_opts, options.pingInterval));
-        exceptionIfError(natsOptions_SetMaxPingsOut(nats_opts, options.maxPingsOut));
-        exceptionIfError(natsOptions_SetAllowReconnect(nats_opts, options.allowReconnect));
-        exceptionIfError(natsOptions_SetMaxReconnect(nats_opts, options.maxReconnect));
-        exceptionIfError(natsOptions_SetReconnectWait(nats_opts, options.reconnectWait));
-        exceptionIfError(natsOptions_SetReconnectBufSize(nats_opts, options.reconnectBufferSize));
-        exceptionIfError(natsOptions_SetMaxPendingMsgs(nats_opts, options.maxPendingMessages));
-        exceptionIfError(natsOptions_SetNoEcho(nats_opts, !options.echo)); //NB! reverted flag
-        exceptionIfError(natsOptions_SetRetryOnFailedConnect(nats_opts, true, nullptr, nullptr));
-        exceptionIfError(natsOptions_SetSendAsap(nats_opts, options.sendAsap));
-        return nats_opts;
-    }
-
     std::vector<const char*> createArrayPointersToElements(const Connection::Urls& elements)
     {
         std::vector<const char*> pointers;
@@ -50,6 +22,9 @@ namespace
 NatsMq::Connection::Connection()
     : _connection(nullptr)
 {
+    auto natsOptions = _options.rawOptions();
+    setErrorHandler(natsOptions);
+    setConnectionHandlers(natsOptions);
 }
 
 NatsMq::Connection::~Connection()
@@ -62,17 +37,17 @@ ConnectionStatus Connection::status() const
     return static_cast<ConnectionStatus>(natsConnection_Status(_connection));
 }
 
-void NatsMq::Connection::connect(const Urls& urls, const Options& options)
+void Connection::setOption(Option option, const OptionValue& val)
+{
+    _options.set(option, val);
+}
+
+void NatsMq::Connection::connect(const Urls& urls)
 {
     if (urls.empty())
         return;
 
-    NatsOptionsPtr optionsPtr(createNatsOptions(options), &natsOptions_Destroy);
-
-    auto natsOptions = optionsPtr.get();
-    setErrorHandler(natsOptions);
-    setConnectionHandlers(natsOptions);
-
+    auto natsOptions = _options.rawOptions();
     auto urlPointers = createArrayPointersToElements(urls);
 
     exceptionIfError(natsOptions_SetServers(natsOptions, urlPointers.data(), static_cast<int>(urlPointers.size())));

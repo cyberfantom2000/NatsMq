@@ -34,7 +34,7 @@ int main()
 {
     constexpr auto subject = "example_subject";
 
-    std::unique_ptr<Client> client(Client::configureAndCreate());
+    std::unique_ptr<Client> client(Client::create());
 
     try
     {

@@ -11,7 +11,6 @@ namespace Tests
 {
     constexpr auto python{ "py" };
     constexpr auto pyFile{ "SimpleNatsClient.py" };
-    constexpr auto clientThreadPoolSize{ 1 };
     constexpr auto validNatsUrl{ "nats://localhost:4222" };
 
     struct SignalEmitCounter

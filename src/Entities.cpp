@@ -4,25 +4,6 @@
 
 #include <cstring>
 
-NatsMq::Options::Options()
-{
-    randomize           = true;
-    timeout             = NATS_OPTS_DEFAULT_TIMEOUT;
-    secure              = false;
-    verbose             = false;
-    pedantic            = false;
-    pingInterval        = NATS_OPTS_DEFAULT_PING_INTERVAL;
-    maxPingsOut         = NATS_OPTS_DEFAULT_MAX_PING_OUT;
-    ioBufferSize        = NATS_OPTS_DEFAULT_IO_BUF_SIZE;
-    allowReconnect      = true;
-    maxReconnect        = NATS_OPTS_DEFAULT_MAX_RECONNECT;
-    reconnectWait       = NATS_OPTS_DEFAULT_RECONNECT_WAIT;
-    reconnectBufferSize = NATS_OPTS_DEFAULT_RECONNECT_BUF_SIZE;
-    maxPendingMessages  = NATS_OPTS_DEFAULT_MAX_PENDING_MSGS;
-    echo                = true;
-    sendAsap            = false;
-}
-
 NatsMq::ByteArray NatsMq::ByteArray::fromRawData(const char* data, int len)
 {
     auto res = ByteArray(data, len);

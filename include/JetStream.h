@@ -6,18 +6,23 @@
 #include "JsStream.h"
 #include "Message.h"
 #include "Subscription.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
     class Connection;
     class Context;
 
-    class JetStream
+    class NATSMQ_EXPORT JetStream
     {
     public:
         static JetStream* configureAndCreate(std::shared_ptr<Connection> connection, const JsOptions& options);
 
         ~JetStream();
+
+        JetStream(JetStream&&);
+
+        JetStream& operator=(JetStream&&);
 
         JsStream* getOrCreateStream(const JsStreamConfig& config) const;
 

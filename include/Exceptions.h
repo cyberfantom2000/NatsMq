@@ -3,14 +3,15 @@
 #include <stdexcept>
 
 #include "Entities.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
-    void exceptionIfError(int status);
+    void NATSMQ_EXPORT exceptionIfError(int status);
 
-    void jsExceptionIfError(int status, int error = static_cast<int>(JsError::NoJsError));
+    void NATSMQ_EXPORT jsExceptionIfError(int status, int error = static_cast<int>(JsError::NoJsError));
 
-    struct Exception : public std::runtime_error
+    struct NATSMQ_EXPORT Exception : public std::runtime_error
     {
         Exception(Status);
 
@@ -19,7 +20,7 @@ namespace NatsMq
         Status status;
     };
 
-    struct JsException final : public Exception
+    struct NATSMQ_EXPORT JsException final : public Exception
     {
         JsException(Status s, JsError e);
 

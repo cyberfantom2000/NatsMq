@@ -10,13 +10,12 @@ int main()
 {
     constexpr auto subject = "example_subject";
 
-    std::unique_ptr<Client> client(Client::configureAndCreate());
+    std::unique_ptr<Client> client(Client::create());
 
     try
     {
-        Options opts;
-        opts.sendAsap = true; // off buffering, making Publish calls send data right away
-        client->connect({ "nats://localhost:4222" }, opts);
+        client->setOption(Option::SendAsap, true);
+        client->connect({ "nats://localhost:4222" });
 
         auto sub = client->subscribe(subject);
 

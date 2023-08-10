@@ -6,26 +6,39 @@
 
 #include "Message.h"
 #include "Subscription.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
     class JetStream;
     class Connection;
 
-    class Client
+    class NATSMQ_EXPORT Client
     {
     public:
         using Urls = std::vector<std::string>;
 
-        static Client* configureAndCreate(int clientThreadPoolSize = 1);
+        static void setThreadPoolSize(int count = 1);
+
+        static Client* create();
 
         Client(Connection*);
 
         ~Client();
 
+        Client(const Client&) = default;
+
+        Client(Client&&) = default;
+
+        Client& operator=(const Client&) = default;
+
+        Client& operator=(Client&&) = default;
+
         ConnectionStatus connectionStatus() const;
 
-        void connect(const Urls& hosts, const std::optional<Options>& options = {});
+        void setOption(Option option, const OptionValue& val);
+
+        void connect(const Urls& hosts);
 
         void disconnect();
 

@@ -8,7 +8,7 @@
 #include "Statistics.h"
 #include "SubscriptionImpl.h"
 #include "Utils.h"
-#include "private/versioncontrol.h"
+#include "versioncontrol.h"
 
 namespace
 {
@@ -16,9 +16,13 @@ namespace
     using NatsMsgPtr = std::unique_ptr<natsMsg, decltype(&natsMsg_Destroy)>;
 }
 
-NatsMq::Client* NatsMq::Client::configureAndCreate(int clientThreadPoolSize)
+void NatsMq::Client::setThreadPoolSize(int count)
 {
-    configurePoolSize(clientThreadPoolSize);
+    configurePoolSize(count);
+}
+
+NatsMq::Client* NatsMq::Client::create()
+{
     const auto connection = new Connection();
     return new Client(connection);
 }
@@ -36,12 +40,17 @@ NatsMq::ConnectionStatus NatsMq::Client::connectionStatus() const
     return _connection->status();
 }
 
-void NatsMq::Client::connect(const Urls& hosts, const std::optional<Options>& options)
+void NatsMq::Client::setOption(Option option, const OptionValue& val)
+{
+    _connection->setOption(option, val);
+}
+
+void NatsMq::Client::connect(const Urls& hosts)
 {
     if (isConnected())
         disconnect();
 
-    _connection->connect(hosts, options.value_or(Options()));
+    _connection->connect(hosts);
 }
 
 void NatsMq::Client::disconnect()

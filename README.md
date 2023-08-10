@@ -18,6 +18,7 @@ Cpp wrapper over the [official cnats library](https://github.com/nats-io/nats.c)
         * [Key value store set data](#key-value-store-set-data)
         * [Key value store get data](#key-value-store-get-data)
         * [Key value store remove data](#key-value-store-get-data)
+    * [Advanced settings](#advanced-settings)
 - [Communication](#communication)
 
 ## Installing
@@ -58,7 +59,7 @@ Start the NATS server first, then run a tests. For a JetStream tests, the server
 Please note, there may be typos or errors, for specific examples, look in the examples folder.
 
 ### Create core client
-For create client you must use static function ```NatsMq::Client::configureAndCreate(int)```. This function return pointer on a client and you must take care about of freeing the memory. This function expect thread pool size as a parameter, by default 1. This parameter depends on the load and performance of your machine. 
+For create client you must use static function ```NatsMq::Client::create()```. This function return pointer on a client and you must take care about of freeing the memory. By default, each asynchronous subscriber that is created has its own message delivery thread. To set the size of the thread pool for delivering messages, use the static function. [More information about thread pool size](http://nats-io.github.io/nats.c/group__library_group.html#gab21e94ce7a7d226611ea2c05914cf19d).
 Most functions throw exceptions when an error occurs, so you must handle them. All exceptions inherited from std::runtime_error, they have a "what()" method and a public "status" field that stores error code. 
 when the client is destroyed, it will close the connection to the server.
 
@@ -69,7 +70,7 @@ when the client is destroyed, it will close the connection to the server.
 
 int main()
 {
-  std::unique_ptr<NatsMq::Client> client(NatsMq::Client::configureAndCreate());
+  std::unique_ptr<NatsMq::Client> client(NatsMq::Client::create());
   try
   {
       client->connect({"nats://localhost:4222"});
@@ -165,12 +166,11 @@ The response to the request consists of two parts. 1. You create a subscription 
 int main()
 {
   
-  std::unique_ptr<NatsMq::Client> client(NatsMq::Client::configureAndCreate());
+  std::unique_ptr<NatsMq::Client> client(NatsMq::Client::create());
   try
   {
-      NatsMq::Options options;
-      options.sendAsap = true;
-      client->connect({"nats://localhost:4222"}, options);
+      client->setOption(NatsMq::Option::SendAsap, true);
+      client->connect({"nats://localhost:4222"});
 
       auto replyCb = [&client](NatsMq::IncomingMessage msg) {
             /* handle incoming msg */
@@ -219,10 +219,10 @@ namespace
 
 int main()
 {
-    std::unique_ptr<NatsMq::Client> client(NatsMq::Client::configureAndCreate());
+    std::unique_ptr<NatsMq::Client> client(NatsMq::Client::create());
     
     try
-    {
+    {connect
         client->connect({ "nats://localhost:4222" });
         std::unique_ptr<NatsMq::JetStream> js(client->createJetStream());
 
@@ -436,6 +436,38 @@ catch(const NatsMq::Exception& exc)
    std::cout << exc.what();
 }
 ```
+
+### Advanced settings
+Advanced connection setting is carried out by setting the settings through the function ```client->setOption()```. This function expects 2 arguments: the first is the value of the ```NatsMq::Option``` enum, the second is the value to be set.
+
+**Note the "Expect type" column containing the exact type expected by the function. If you put int instead of int64_t you will get an std::bad_variant_access!**
+
+Below is a table with default values ​​and a brief description. I'll leave links to the cnatc developer documentation if you need more information.
+
+| Enum value              |Expect type            | Default value   | Description   |
+|:-----------------------:|:---------------------:|:---------------:|:-------------:|
+| Randomize               |bool                   | false           |If true, then provided list of server URLs is used in random order. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gaabf8763b931dcf389c83fd95d760a413)|
+| Verbose                 |bool                   | false           |If true, then sends are echoed by the server with an OK protocol message. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gaa16bfd09ef318af18c27a0e199681b69)|
+| Pedanic                 |bool                   | false           |If true, then some extra checks will be performed by the server. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga26f166af20de98bec67bc6cc916f769e)|
+| AllowRecconect          |bool                   | true            |Specifies whether or not the client library should try to reconnect when losing the connection to the NATS Server. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga3d1d3cb2f2a0e23d27dd60e96d1cc91b)|
+| RetryOnFailedConnect    |bool                   | true            |If true and connection can't be established right away, the library will attempt to connect based on the reconnect attempts and delay settings. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga20946800d024b7089e73d63454d1c19f)|
+| MaxReconnect            |int                    | 2000            |Specifies the maximum number of reconnect attempts. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gab54cd2719c0b64eebd6c7b83dd2908a0)|
+| SendAsap                |bool                   | false           |If true, then disables buffering and will make Publish calls send the data right away, reducing latency, but also throughput.[Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga8f06568cc3319a5a0eef9f80282034ca)|
+| DisableNoResponders     |bool                   | false           |If true, then disable "no responders" feature and all requests will wait until timeout. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga192465163abb87ad48a843b45cdf9984)|
+| UseGlobalMsgDelivery    |bool                   | true            |If true asynchronous subscribers will use a shared thread pool to deliver messages, if false then each subscriber has its own thread. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gabf060c92648b50c069f0abe7cbb06f1c)|
+| SkipServerVerification  |bool                   | false           |If true, then disable the server certificate verification. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga6f804ec44adc299989fe623570679da3)|
+| FailRequestOnDisconnect |bool                   | false           |If true and disconnect occurred, then all request call ends with error. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gadef4376a5e608cbc8c1a9e2b6335dc79)|
+| MaxPingsOut             |int                    | 2               |Maximum number of PINGs without corresponding PONGs (which should be received from the server) before closing the connection. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gaaff89c3f41627f4b2929dbc9b82d265b)|
+| IOBufferSize            |int                    | 32768           |Size, in bytes, of the internal read/write buffers used for reading/writing data from a socket. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga1a3e3abfd7ddd8aff247df8f332bbda3)|
+| ReconnectBufferSize     |int                    | 8'388'608       |Size, in bytes, of the backing buffer holding published data while the library is reconnecting. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gaa0d4b7ece8477cb9879f0dafff3456a5)|
+| MaxPendingMessages      |int                    | 65536           |Maximum number of inbound messages that can be buffered in the library, for each subscription, before inbound messages are dropped. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga95510436eee06f9992ded96a44795c40)|
+|        Timeout          |int64_t                | 2000            |This timeout, expressed in milliseconds, is used to interrupt a (re)connect attempt to a NATS Server. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga17cd7fe41176cd98aca1184fa9352ad9)|
+| PingInterval            |int64_t                | 120'000         |Interval, expressed in milliseconds, in which the client sends PING protocols to the NATS Server. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gae68fb615835364c0809555e8dc93f57e)|
+| ReconnectWait           |int64_t                | 2000            |Interval, expressed in milliseconds, specifies how long to wait between two reconnect attempts from the same server. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gae68fb615835364c0809555e8dc93f57e)|
+| Name                    |std::string            | **not defined** |This name is sent as part of the CONNECT protocol. There is no default name.[Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga1c529d347be0fe2eec17c7f4698e283e)|
+| Token                   |std::string            | **not defined** |To instruct the client library to use this token when connecting to a server that requires authentication. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#gad58a5b9dabadeebda30e952ff7b39193)|
+| UserCreds               |NatsMq::UserCredentials| **not defined** |To instruct the client library to use those credentials when connecting to a server that requires authentication. [Link](http://nats-io.github.io/nats.c/group__opts_group.html#ga5b99da7dd74aac3be962f323c3863d9e)|
+
 
 ## Communication
 You can contact me about the problem and improvements by mail Tak.sebek@yandex.ru. Please note that I can take a long time to answer.

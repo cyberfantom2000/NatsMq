@@ -15,7 +15,7 @@ namespace
 
     std::unique_ptr<JetStream> createJetStream()
     {
-        const auto client = std::unique_ptr<Client>(Client::configureAndCreate(clientThreadPoolSize));
+        const auto client = std::unique_ptr<Client>(Client::create());
         client->connect({ validNatsUrl });
         return std::unique_ptr<JetStream>(client->createJetStream());
     }

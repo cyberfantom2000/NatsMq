@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Entities.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
     class KeyValueStoreImpl;
 
-    class KeyValueStore
+    class NATSMQ_EXPORT KeyValueStore
     {
     public:
         KeyValueStore(KeyValueStoreImpl*);

@@ -4,11 +4,14 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
+
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
-    class ByteArray
+    class NATSMQ_EXPORT ByteArray
     {
     public:
         static ByteArray fromRawData(const char* data, int len);
@@ -35,30 +38,46 @@ namespace NatsMq
         std::vector<char> _bytes;
     };
 
-    struct Options
+    struct GlobalOptions
     {
-        std::string name;
+        int  threadPoolSize{ 1 };
+        bool useGlobalMsgDelivery{ true };
+    };
+
+    enum class Option
+    {
+        Randomize = 1, ///< bool
+        // Secure,                  ///< bool
+        Verbose,                 ///< bool
+        Pedanic,                 ///< bool
+        AllowRecconect,          ///< bool
+        RetryOnFailedConnect,    ///< bool
+        MaxReconnect,            ///< int
+        Echo,                    ///< bool
+        SendAsap,                ///< bool
+        DisableNoResponders,     ///< bool
+        UseGlobalMsgDelivery,    ///< bool
+        SkipServerVerification,  ///< bool
+        FailRequestOnDisconnect, ///< bool
+        MaxPingsOut,             ///< int
+        IOBufferSize,            ///< int
+        ReconnectBufferSize,     ///< int
+        MaxPendingMessages,      ///< int
+        Timeout,          ///< int64_t
+        PingInterval,            ///< int64_t
+        ReconnectWait,           ///< int64_t
+        Name,                    ///< std::string
+        Token,                   ///< std::string
+        UserCreds,               ///< UserCredentials
+    };
+
+    struct UserCredentials
+    {
         std::string user;
         std::string password;
-        std::string token;
-        bool        randomize;      ///< default: false
-        bool        secure;         ///< default: false
-        bool        verbose;        ///< default: false
-        bool        pedantic;       ///< default: false
-        bool        allowReconnect; ///< default: true
-        bool        echo;           ///< default: true
-        bool        sendAsap;       ///< default: false
-        int64_t     timeout;
-        int64_t     pingInterval;
-        int64_t     reconnectWait;
-        int         maxPingsOut;
-        int         ioBufferSize;
-        int         maxReconnect;
-        int         reconnectBufferSize;
-        int         maxPendingMessages;
-
-        Options();
     };
+
+    using OptionValue = std::variant<bool, int, int64_t, std::string, UserCredentials>;
 
     struct IOStatistic
     {

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 include(FetchContent)
+include(GenerateExportHeader)
 
 project(NatsMq LANGUAGES CXX)
 
@@ -55,9 +56,12 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
 
+GENERATE_EXPORT_HEADER(${PROJECT_NAME} EXPORT_FILE_NAME ${CMAKE_SOURCE_DIR}/include/natsmq_export.h)
+
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
     PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/core>

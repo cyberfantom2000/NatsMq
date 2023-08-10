@@ -20,7 +20,7 @@ TEST(NatsMqCoreTesting, connection_success)
 {
     std::unique_ptr<SignalEmitCounter> catcher;
 
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
 
     catcher = std::make_unique<SignalEmitCounter>(client.get(), 3, 0);
 
@@ -33,20 +33,19 @@ TEST(NatsMqCoreTesting, connection_error)
 {
     std::unique_ptr<SignalEmitCounter> catcher;
 
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
 
     catcher = std::make_unique<SignalEmitCounter>(client.get(), 1);
 
-    NatsMq::Options opts;
-    opts.maxReconnect  = 1;
-    opts.reconnectWait = 10;
+    client->setOption(NatsMq::Option::MaxReconnect, 1);
+    client->setOption(NatsMq::Option::ReconnectWait, 10ll);
 
-    EXPECT_THROW({ client->connect({ "nats://localhost:1111" }, opts); }, NatsMq::Exception);
+    EXPECT_THROW({ client->connect({ "nats://localhost:1111" }); }, NatsMq::Exception);
 }
 
 TEST(NatsMqCoreTesting, attempt_publish)
 {
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
     client->connect({ validNatsUrl });
     client->publish(NatsMq::Message{ "test", "test one two" });
 }
@@ -56,7 +55,7 @@ TEST(NatsMqCoreTesting, request_error)
     auto cb = []() {
         try
         {
-            const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+            const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
             client->connect({ validNatsUrl });
             client->request(NatsMq::Message{ "test", "test" });
         }
@@ -81,7 +80,7 @@ TEST(NatsMqCoreTesting, request_with_responder)
     const auto descriptor = ProcessDescriptor{ 15000, python, arguments };
 
     auto cb = []() {
-        const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+        const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
         client->connect({ validNatsUrl });
         return client->request(NatsMq::Message{ subject, "test123" }, 10000);
     };
@@ -93,7 +92,7 @@ TEST(NatsMqCoreTesting, request_with_responder)
 
 TEST(NatsMqCoreTesting, async_request_error)
 {
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
     client->connect({ validNatsUrl });
 
     auto futureMsg = client->asyncReuest(NatsMq::Message{ subject, "test123" }, 200);
@@ -109,7 +108,7 @@ TEST(NatsMqCoreTesting, async_request_with_responder)
     const auto process    = createProcess();
     const auto descriptor = ProcessDescriptor{ 15000, python, arguments };
 
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
 
     auto cb = [&]() {
         client->connect({ validNatsUrl });
@@ -132,7 +131,7 @@ TEST(NatsMqCoreTesting, subscribe)
 {
     constexpr auto expectMsg{ "test_subscribe" };
 
-    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::configureAndCreate(clientThreadPoolSize));
+    const auto client = std::unique_ptr<NatsMq::Client>(NatsMq::Client::create());
     client->connect({ validNatsUrl });
     auto sub = client->subscribe(subject);
 

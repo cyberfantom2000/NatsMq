@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Entities.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
     class JsStreamImpl;
 
-    class JsStream
+    class NATSMQ_EXPORT JsStream
     {
     public:
         JsStream() = default;

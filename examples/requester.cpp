@@ -12,7 +12,7 @@ int main()
     constexpr auto data{ "example_data" };
     constexpr auto timeoutMs{ 3000 };
 
-    std::unique_ptr<Client> client(Client::configureAndCreate());
+    std::unique_ptr<Client> client(Client::create());
 
     try
     {

@@ -6,9 +6,11 @@
 #include <mutex>
 
 #include "Entities.h"
-
+#include "Options.h"
 namespace NatsMq
 {
+    class Options;
+
     class Connection
     {
     public:
@@ -20,8 +22,10 @@ namespace NatsMq
 
         ConnectionStatus status() const;
 
-        //! Нет возможности перенести в конструктор т.к. будет потеряна возможность излучать сигналы connecting и connected
-        void connect(const Urls& hosts, const Options& options);
+        void setOption(Option option, const OptionValue& val);
+
+        //! Нет возможности перенести в конструктор т.к. будет потеряна возможность оповещать о состояниях connecting и connected
+        void connect(const Urls& hosts);
 
         void disconnect() const;
 
@@ -52,6 +56,7 @@ namespace NatsMq
         std::vector<ConnectionStateCb> _connectionCallbacks;
         std::vector<ErrorCb>           _errorCallbacks;
 
+        Options         _options;
         natsConnection* _connection;
 
         mutable std::mutex _mutex;

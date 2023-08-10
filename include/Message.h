@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "Entities.h"
+#include "natsmq_export.h"
 
 namespace NatsMq
 {
@@ -27,7 +28,7 @@ namespace NatsMq
 
     struct IncomingMessageImpl;
 
-    struct IncomingMessage : Message
+    struct NATSMQ_EXPORT IncomingMessage : Message
     {
         IncomingMessage() = default;
 
@@ -41,7 +42,7 @@ namespace NatsMq
 
     struct JsIncomingMessageImpl;
 
-    struct JsIncomingMessage : IncomingMessage
+    struct NATSMQ_EXPORT JsIncomingMessage : IncomingMessage
     {
         JsIncomingMessage(JsIncomingMessageImpl* msg);
 
