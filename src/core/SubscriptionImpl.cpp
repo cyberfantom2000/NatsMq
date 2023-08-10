@@ -14,6 +14,10 @@ NatsMq::Subscription::Subscription(SubscriptionImpl* sub)
 {
 }
 
+NatsMq::Subscription::Subscription(Subscription&&) = default;
+
+NatsMq::Subscription& NatsMq::Subscription::operator=(Subscription&&) = default;
+
 NatsMq::SubscriptionStatistic NatsMq::Subscription::statistics() const
 {
     return _impl->statistics();

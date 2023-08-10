@@ -22,6 +22,10 @@ NatsMq::JsSubscription::JsSubscription(JsSubscriptionImpl* sub)
 {
 }
 
+NatsMq::JsSubscription::JsSubscription(JsSubscription&&) = default;
+
+NatsMq::JsSubscription& NatsMq::JsSubscription::operator=(JsSubscription&&) = default;
+
 int NatsMq::JsSubscription::registerListener(const JsSubscriptionCb& cb)
 {
     return registerListener(JsSubscriptionCb(cb));

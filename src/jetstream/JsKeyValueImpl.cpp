@@ -26,6 +26,10 @@ NatsMq::KeyValueStore::KeyValueStore(KeyValueStoreImpl* impl)
 {
 }
 
+NatsMq::KeyValueStore& NatsMq::KeyValueStore::operator=(KeyValueStore&&) = default;
+
+NatsMq::KeyValueStore::KeyValueStore(KeyValueStore&&) = default;
+
 void NatsMq::KeyValueStore::deleteStore() const
 {
     _impl->deleteStore();

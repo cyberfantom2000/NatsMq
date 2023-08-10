@@ -14,6 +14,10 @@ namespace NatsMq
 
         ~KeyValueStore();
 
+        KeyValueStore(KeyValueStore&&);
+
+        KeyValueStore& operator=(KeyValueStore&&);
+
         void deleteStore() const;
 
         std::string storeName() const;

@@ -15,6 +15,10 @@ namespace NatsMq
 
         ~Subscription();
 
+        Subscription(Subscription&&);
+
+        Subscription& operator=(Subscription&&);
+
         SubscriptionStatistic statistics() const;
 
         //! Called all times for a new message
@@ -38,6 +42,10 @@ namespace NatsMq
         JsSubscription(JsSubscriptionImpl*);
 
         ~JsSubscription();
+
+        JsSubscription(JsSubscription&&);
+
+        JsSubscription& operator=(JsSubscription&&);
 
         //! Called all times for a new message
         int registerListener(const JsSubscriptionCb& cb);
