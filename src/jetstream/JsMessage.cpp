@@ -40,9 +40,9 @@ NatsMq::JsIncomingMessage::JsIncomingMessage(JsIncomingMessageImpl* msg)
 
 NatsMq::JsIncomingMessage::~JsIncomingMessage() = default;
 
-NatsMq::JsIncomingMessage::JsIncomingMessage(JsIncomingMessage&&) = default;
+NatsMq::JsIncomingMessage::JsIncomingMessage(JsIncomingMessage&&) noexcept = default;
 
-NatsMq::JsIncomingMessage& NatsMq::JsIncomingMessage::operator=(JsIncomingMessage&&) = default;
+NatsMq::JsIncomingMessage& NatsMq::JsIncomingMessage::operator=(JsIncomingMessage&&) noexcept = default;
 
 void NatsMq::JsIncomingMessage::ack() const
 {

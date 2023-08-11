@@ -15,9 +15,9 @@ namespace NatsMq
 
         ~Subscription();
 
-        Subscription(Subscription&&);
+        Subscription(Subscription&&) noexcept;
 
-        Subscription& operator=(Subscription&&);
+        Subscription& operator=(Subscription&&) noexcept;
 
         SubscriptionStatistic statistics() const;
 
@@ -43,9 +43,9 @@ namespace NatsMq
 
         ~JsSubscription();
 
-        JsSubscription(JsSubscription&&);
+        JsSubscription(JsSubscription&&) noexcept;
 
-        JsSubscription& operator=(JsSubscription&&);
+        JsSubscription& operator=(JsSubscription&&) noexcept;
 
         //! Called all times for a new message
         int registerListener(const JsSubscriptionCb& cb);
@@ -69,9 +69,9 @@ namespace NatsMq
 
         ~JsPullSubscription();
 
-        JsPullSubscription(JsPullSubscription&&);
+        JsPullSubscription(JsPullSubscription&&) noexcept;
 
-        JsPullSubscription& operator=(JsPullSubscription&&);
+        JsPullSubscription& operator=(JsPullSubscription&&) noexcept;
 
         //! Fetch new messages from server
         std::vector<JsIncomingMessage> fetch(int batch = 1, uint64_t timeoutMs = 5000) const;

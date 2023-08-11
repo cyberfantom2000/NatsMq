@@ -22,9 +22,9 @@ NatsMq::JsSubscription::JsSubscription(JsSubscriptionImpl* sub)
 {
 }
 
-NatsMq::JsSubscription::JsSubscription(JsSubscription&&) = default;
+NatsMq::JsSubscription::JsSubscription(JsSubscription&&) noexcept = default;
 
-NatsMq::JsSubscription& NatsMq::JsSubscription::operator=(JsSubscription&&) = default;
+NatsMq::JsSubscription& NatsMq::JsSubscription::operator=(JsSubscription&&) noexcept = default;
 
 int NatsMq::JsSubscription::registerListener(const JsSubscriptionCb& cb)
 {
@@ -50,9 +50,9 @@ NatsMq::JsPullSubscription::JsPullSubscription(JsPullSubscriptionImpl* impl)
 
 NatsMq::JsPullSubscription::~JsPullSubscription() = default;
 
-NatsMq::JsPullSubscription::JsPullSubscription(JsPullSubscription&&) = default;
+NatsMq::JsPullSubscription::JsPullSubscription(JsPullSubscription&&) noexcept = default;
 
-NatsMq::JsPullSubscription& NatsMq::JsPullSubscription::operator=(JsPullSubscription&&) = default;
+NatsMq::JsPullSubscription& NatsMq::JsPullSubscription::operator=(JsPullSubscription&&) noexcept = default;
 
 std::vector<NatsMq::JsIncomingMessage> NatsMq::JsPullSubscription::fetch(int batch, uint64_t timeoutMs) const
 {

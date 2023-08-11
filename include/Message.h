@@ -48,9 +48,9 @@ namespace NatsMq
 
         ~JsIncomingMessage();
 
-        JsIncomingMessage(JsIncomingMessage&&);
+        JsIncomingMessage(JsIncomingMessage&&) noexcept;
 
-        JsIncomingMessage& operator=(JsIncomingMessage&&);
+        JsIncomingMessage& operator=(JsIncomingMessage&&) noexcept;
 
         void ack() const;
 

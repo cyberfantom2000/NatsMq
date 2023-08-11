@@ -68,5 +68,10 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/jetstream>
 )
 
-add_subdirectory(examples)
-add_subdirectory(tests)
+if(NATSMQ_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+if(NATSMQ_BUILD_EXAMPLES)
+  add_subdirectory(tests)
+endif()
+
