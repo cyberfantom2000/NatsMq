@@ -5,8 +5,8 @@ include(GenerateExportHeader)
 
 project(NatsMq LANGUAGES CXX)
 
-option(NATSMQ_BUILD_TESTS "Build unit tests" ON)
-option(NATSMQ_BUILD_EXAMPLES "Build examples" ON)
+option(NATSMQ_BUILD_TESTS "Build unit tests" OFF)
+option(NATSMQ_BUILD_EXAMPLES "Build examples" OFF)
 #option(NATSMQ_USE_LIBEVENT "Use libevent library" OFF)
 #option(NATSMQ_USE_LIBUV "Use libuv library" OFF)
 
