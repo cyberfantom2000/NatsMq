@@ -14,9 +14,9 @@ NatsMq::Subscription::Subscription(SubscriptionImpl* sub)
 {
 }
 
-NatsMq::Subscription::Subscription(Subscription&&) = default;
+NatsMq::Subscription::Subscription(Subscription&&) noexcept = default;
 
-NatsMq::Subscription& NatsMq::Subscription::operator=(Subscription&&) = default;
+NatsMq::Subscription& NatsMq::Subscription::operator=(Subscription&&) noexcept = default;
 
 NatsMq::SubscriptionStatistic NatsMq::Subscription::statistics() const
 {
