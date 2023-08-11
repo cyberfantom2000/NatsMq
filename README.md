@@ -5,14 +5,16 @@ Cpp wrapper over the [official cnats library](https://github.com/nats-io/nats.c)
 - [Installing](#installing)
 - [Tests](#tests)
 - [Examples](#examples)
-    * [Create core client](#create-core-client)
-    * [Publish](#publish)
-    * [Subscribe](#subscribe)
-    * [Request](#request)
-    * [Reply](#reply)
-    * [Create JetStream client](#create-jetstream-client)
-    * [Jet Stream publish](#jet-stream-publish)
-    * [Jet Stream subscribe](#jet-stream-subscribe)
+    * [Core](#core)
+       * [Create core client](#create-core-client)
+       * [Publish](#publish)
+       * [Subscribe](#subscribe)
+       * [Request](#request)
+       * [Reply](#reply)
+    * [JetStream](#jetstream)
+       * [Create JetStream client](#create-jetstream-client)
+       * [Jet Stream publish](#jet-stream-publish)
+       * [Jet Stream subscribe](#jet-stream-subscribe)
     * [Key Value store](#key-value-store)
         * [Key value store managment](#key-value-store-managment)
         * [Key value store set data](#key-value-store-set-data)
@@ -57,6 +59,8 @@ Start the NATS server first, then run a tests. For a JetStream tests, the server
 
 ## Examples
 Please note, there may be typos or errors, for specific examples, look in the examples folder.
+
+## Core
 
 ### Create core client
 For create client you must use static function ```NatsMq::Client::create()```. This function return pointer on a client and you must take care about of freeing the memory. By default, each asynchronous subscriber that is created has its own message delivery thread. To set the size of the thread pool for delivering messages, use the static function. [More information about thread pool size](http://nats-io.github.io/nats.c/group__library_group.html#gab21e94ce7a7d226611ea2c05914cf19d).
@@ -200,6 +204,8 @@ int main()
   return 0;
 }
 ```
+
+## JetStream
 
 ### Create JetStream client
 For create JetStream client you must first create and connect core client. After you get the JetStream from the core client, it can be removed. This will not close the connection because it is shared between them.
