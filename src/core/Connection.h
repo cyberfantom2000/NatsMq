@@ -20,10 +20,6 @@ namespace NatsMq
 
         ~Connection();
 
-        Connection(Connection&&) = default;
-
-        Connection& operator=(Connection&&) = default;
-
         ConnectionStatus status() const;
 
         void setOption(Option option, const OptionValue& val);

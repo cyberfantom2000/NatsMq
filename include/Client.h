@@ -38,39 +38,39 @@ namespace NatsMq
 
         void setOption(Option option, const OptionValue& val);
 
-        void connect(const Urls& hosts);
+        void connect(const Urls& hosts) const;
 
-        void disconnect();
+        void disconnect() const;
 
-        bool pingServer(int timeout) noexcept;
+        bool pingServer(int timeout) const noexcept;
 
-        IOStatistic statistics();
+        IOStatistic statistics() const;
 
-        void publish(const Message& msg);
+        void publish(const Message& msg) const;
 
-        IncomingMessage request(const Message& msg, uint64_t timeoutMs = 2000);
+        IncomingMessage request(const Message& msg, uint64_t timeoutMs = 2000) const;
 
-        std::future<IncomingMessage> asyncReuest(const Message& msg, uint64_t timeoutMs = 2000);
+        std::future<IncomingMessage> asyncReuest(const Message& msg, uint64_t timeoutMs = 2000) const;
 
-        Subscription subscribe(const std::string& subject);
+        Subscription subscribe(const std::string& subject) const;
 
-        Subscription subscribe(const std::string& subject, const std::string& queueGroup);
+        Subscription subscribe(const std::string& subject, const std::string& queueGroup) const;
 
-        JetStream* createJetStream(const JsOptions& options = {});
+        JetStream* createJetStream(const JsOptions& options = {}) const;
 
         //! Called all times when connection status changed
-        int registerConnectionCallback(const ConnectionStateCb&);
+        int registerConnectionCallback(const ConnectionStateCb&) const;
 
-        int registerConnectionCallback(ConnectionStateCb&&);
+        int registerConnectionCallback(ConnectionStateCb&&) const;
 
-        void unregisterConnectionCallback(int idx);
+        void unregisterConnectionCallback(int idx) const;
 
         //! Called all times when error occured
-        int registerErrorCallback(const ErrorCb&);
+        int registerErrorCallback(const ErrorCb&) const;
 
-        int registerErrorCallback(ErrorCb&&);
+        int registerErrorCallback(ErrorCb&&) const;
 
-        void unregisterErrorCallback(int idx);
+        void unregisterErrorCallback(int idx) const;
 
     private:
         bool isConnected() const;

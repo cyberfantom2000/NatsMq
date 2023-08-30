@@ -11,6 +11,9 @@
 
 namespace NatsMq
 {
+    class Client;
+    class JetStream;
+
     class NATSMQ_EXPORT ByteArray
     {
     public:
