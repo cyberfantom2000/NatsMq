@@ -14,34 +14,37 @@ int main()
 
     try
     {
-        client->setOption(Option::SendAsap, true);
-        client->connect({ "nats://localhost:4222" });
+        ConnectionOptions options;
+        options.sendAsap = true; // sending messages without delay
 
-        auto sub = client->subscribe(subject);
+        client->connect({ "nats://172.20.73.29:4222" });
 
-        std::condition_variable cv;
-        std::mutex              m;
-        auto                    replyCb = [&cv, &client](IncomingMessage msg) {
+        auto replyCb = [&client](Message msg) {
             /* handle incoming msg */
-            std::cout << msg.data.constData();
+            std::cout << std::string(msg) << std::endl;
 
             /* make reply */
-            msg.data = "reply_data";
+            std::string reply = "it is request callback reply";
+
+            msg.subject = msg.replySubject;
+            msg.replySubject.clear();
+            msg.data.clear();
+            msg.data.insert(msg.data.end(), reply.begin(), reply.end());
+
             try
             {
-                client->publish(msg);
+                client->publish(std::move(msg));
             }
             catch (const Exception& exc)
             {
                 std::cout << exc.what();
             }
-            cv.notify_one();
         };
 
-        sub.registerListener(replyCb);
+        std::unique_ptr<Subscription> sub(client->subscribe(subject, std::move(replyCb)));
 
-        // wait incoming request
-        std::unique_lock<std::mutex> lc(m);
+        auto reply = client->request(Message(subject, "it is request callback data"));
+        std::cout << std::string(reply) << std::endl;
     }
     catch (const NatsMq::Exception& exc)
     {

@@ -1,15 +1,23 @@
 #include "Publisher.h"
 
 #include "Exceptions.h"
-#include "Utils.h"
+#include "Message.h"
+#include "private/utils.h"
 
-NatsMq::Publisher::Publisher(natsConnection* connection)
+using namespace NatsMq;
+
+Publisher::Publisher(natsConnection* connection)
     : _connection(connection)
 {
 }
 
-void NatsMq::Publisher::puslish(const Message& msg)
+void Publisher::publish(Message msg) const
 {
-    const auto natsMsg = createNatsMessage(msg);
-    exceptionIfError(natsConnection_PublishMsg(_connection, natsMsg.get()));
+    const auto cnatsMsg = createCnatsMessage(msg);
+    exceptionIfError(natsConnection_PublishMsg(_connection, cnatsMsg.get()));
+}
+
+void Publisher::publish(std::string subject, std::string data) const
+{
+    exceptionIfError(natsConnection_PublishString(_connection, subject.c_str(), data.c_str()));
 }

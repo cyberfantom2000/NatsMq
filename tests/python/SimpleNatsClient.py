@@ -1,4 +1,5 @@
 import socket
+import time
 from argparse import ArgumentParser
 from typing import Callable
 from sys import stdout
@@ -13,11 +14,13 @@ def create_argparser() -> ArgumentParser:
     parser.add_argument('--reply_data', default='test', help='Reply to be answer when prompted')
     parser.add_argument('--publish_subject', help='Subject to publish by client')
     parser.add_argument('--publish_data', default='test', help='Data to publish by client')
+    parser.add_argument('--publish_timeout', default=0, type=int, help='Timeout before publish')
     parser.add_argument('--subscribe_subject', help='Subject for client subscription')
     parser.add_argument('--subscribe_reply_subject', help='Subject for a client report on a subscribed message. '
                                                           'Default = arg(--subscribe_subject) + _reply')
     parser.add_argument('--subscribe_reply_data', default='ok',
                         help='Data for a client report on a subscription message')
+    parser.add_argument('--socket_timeout', default=60, type=int, help='Waiting all socket operation')
     return parser
 
 
@@ -76,8 +79,9 @@ class Subscription:
 
 
 class SimpleNatsClient:
-    def __init__(self, address: str, port: int) -> None:
+    def __init__(self, address: str, port: int, socket_timeout: int) -> None:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(socket_timeout)
         self.socket.connect((address, port))
         self.reply_subs = {}
         self.subscribe_subs = {}
@@ -160,6 +164,8 @@ class SimpleNatsClient:
 def publish_if_arg(nats_client, arguments) -> None:
     if args.publish_subject:
         print(f'Add publish task: subject - {arguments.publish_subject}, msg - {arguments.publish_data}')
+        if args.publish_timeout:
+            time.sleep(args.publish_timeout)
         nats_client.publish(arguments.publish_subject, arguments.publish_data)
 
 
@@ -170,11 +176,11 @@ def subscribe_if_arg(nats_client, arguments) -> None:
             reply_subject = arguments.subscribe_subject + '_reply'
 
         print(f'Add subscribe task: subject - {arguments.subscribe_subject}, '
-              f'reply subject - {reply_subject}, reply - {arguments.subscribe_reply_data}')
+            f'reply subject - {reply_subject}, reply - {arguments.subscribe_reply_data}')
 
         def subscribe_cb(msg):
             print(f'New message for subscribers: {msg}. Client reply: subject - {reply_subject}, '
-                  f'reply - {arguments.subscribe_reply_data}')
+                f'reply - {arguments.subscribe_reply_data}')
             nats_client.publish(reply_subject, arguments.subscribe_reply_data)
 
         nats_client.subscribe(arguments.subscribe_subject, subscribe_cb)
@@ -195,23 +201,25 @@ def is_request_or_subscribe(arguments) -> bool:
 
 
 if __name__ == '__main__':
-    print('Start simple NATS client')
     arg_parser = create_argparser()
     args = arg_parser.parse_args()
-
+        
+    print('Start simple NATS client')
+    
     commander = CommandSender(args.cmd_port)
-    client = SimpleNatsClient(args.nats_address, int(args.nats_port))
-
+    client = SimpleNatsClient(args.nats_address, int(args.nats_port), args.socket_timeout)
+    
     publish_if_arg(client, args)
     subscribe_if_arg(client, args)
     register_reply_if_arg(client, args)
-
+    
     print('Client ready', flush=True)
     commander.send('ready')
-
+    
     if is_request_or_subscribe(args):
         client.listen()
-
+    
     client.unsubscribe_all()
     commander.send('close')
     print('Close simple NATS client')
+

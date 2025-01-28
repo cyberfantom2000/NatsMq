@@ -1,82 +1,123 @@
 #pragma once
 
+#include <memory>
+
 #include "Entities.h"
-#include "Message.h"
-#include "natsmq_export.h"
+#include "Export.h"
 
 namespace NatsMq
 {
-    class SubscriptionImpl;
+    class SubscriptionPrivate;
 
     class NATSMQ_EXPORT Subscription
     {
     public:
-        Subscription(SubscriptionImpl*);
+        Subscription(SubscriptionPrivate*);
 
         ~Subscription();
 
-        Subscription(Subscription&&) noexcept;
+        Subscription(Subscription&&);
 
-        Subscription& operator=(Subscription&&) noexcept;
+        Subscription& operator=(Subscription&&);
 
+        //! Get subscription statistics
         SubscriptionStatistic statistics() const;
 
-        //! Called all times for a new message
-        int registerListener(const SubscriptionCb& cb);
+        //! Check subscription status
+        bool isValid() const noexcept;
 
-        int registerListener(SubscriptionCb&& cb);
+        //! Drain will remove interest but continue to invoke callbacks until all messages have been processed.
+        void drain() const;
 
-        void unregisterListener(int idx);
+        //! Similar as drain(), but messages that were not processed within the timeout will be lost
+        void drain(int64_t timeout) const;
+
+        //! Get message count
+        uint64_t messageCount() const;
+
+        //! Specifies the maximum number and size of incoming messages that can be buffered in the library
+        //! for this subscription, before new incoming messages are dropped and NATS_SLOW_CONSUMER status is reported
+        void setPendingLimits(int message, int bytes) const;
+
+        //! Get subscription subject
+        std::string subject() const noexcept;
+
+        //! Get subscription id
+        int64_t id() const noexcept;
+
+        //! Call unsubscribe after 'messages' have been received
+        void setAutoUnsubscribe(int messages) const;
+
+        //! By default, messages that arrive are not immediately delivered. This generally improves performance.
+        //! However, in case of request-reply, this delay has a negative impact.
+        void setNoDeliveryDelay() const;
+
+        //! Removes interest on the subject
+        void unsubscribe() const;
 
     private:
-        std::unique_ptr<SubscriptionImpl> _impl;
+        std::unique_ptr<SubscriptionPrivate> _impl;
     };
 
-    class JsSubscriptionImpl;
-
-    class NATSMQ_EXPORT JsSubscription
+    namespace Js
     {
-    public:
-        JsSubscription() = default;
+        class SubscriptionPrivate;
 
-        JsSubscription(JsSubscriptionImpl*);
+        class NATSMQ_EXPORT Subscription
+        {
+        public:
+            Subscription(Js::SubscriptionPrivate*);
 
-        ~JsSubscription();
+            ~Subscription();
 
-        JsSubscription(JsSubscription&&) noexcept;
+            Subscription(Subscription&&);
 
-        JsSubscription& operator=(JsSubscription&&) noexcept;
+            Subscription& operator=(Subscription&&);
 
-        //! Called all times for a new message
-        int registerListener(const JsSubscriptionCb& cb);
+            //! Get subscription statistics
+            SubscriptionStatistic statistics() const;
 
-        int registerListener(JsSubscriptionCb&& cb);
+            //! Check subscription status
+            bool isValid() const noexcept;
 
-        void unregisterListener(int idx);
+            //! Drain will remove interest but continue to invoke callbacks until all messages have been processed.
+            void drain() const;
 
-    private:
-        std::unique_ptr<JsSubscriptionImpl> _impl;
-    };
+            //! Similar as drain(), but messages that were not processed within the timeout will be lost
+            void drain(int64_t timeout) const;
 
-    class JsPullSubscriptionImpl;
+            //! Returns the number of queued messages in the client for this subscription.
+            uint64_t messageCount() const;
 
-    class NATSMQ_EXPORT JsPullSubscription
-    {
-    public:
-        JsPullSubscription() = default;
+            //! Specifies the maximum number and size of incoming messages that can be buffered in the library
+            //! for this subscription, before new incoming messages are dropped and NATS_SLOW_CONSUMER status is reported
+            void setPendingLimits(int message, int bytes) const;
 
-        JsPullSubscription(JsPullSubscriptionImpl*);
+            //! Get subscription subject
+            std::string subject() const noexcept;
 
-        ~JsPullSubscription();
+            //! Get subscription id
+            int64_t id() const noexcept;
 
-        JsPullSubscription(JsPullSubscription&&) noexcept;
+            //! Call unsubscribe after 'messages' have been received
+            void setAutoUnsubscribe(int messages) const;
 
-        JsPullSubscription& operator=(JsPullSubscription&&) noexcept;
+            //! By default, messages that arrive are not immediately delivered. This generally improves performance.
+            //! However, in case of request-reply, this delay has a negative impact.
+            void setNoDeliveryDelay() const;
 
-        //! Fetch new messages from server
-        std::vector<JsIncomingMessage> fetch(int batch = 1, uint64_t timeoutMs = 5000) const;
+            //! Removes interest on the subject
+            void unsubscribe() const;
 
-    private:
-        std::unique_ptr<JsPullSubscriptionImpl> _impl;
-    };
+            //! Mismatch between the server and client's view of the state of the consumer.
+            //! see more http://nats-io.github.io/nats.c/group__js_sub_group.html#ga0daed9f0d2d00cb14314ecc180a6fa84
+            SubscriptionMismatch mismatch() const;
+
+            //! Consumer information associated with this subscription.
+            Consumer consumerInfo() const;
+
+        private:
+            std::unique_ptr<Js::SubscriptionPrivate> _impl;
+        };
+    }
 }

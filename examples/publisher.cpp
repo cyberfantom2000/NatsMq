@@ -13,7 +13,7 @@ int main()
 
     try
     {
-        client->connect({ "nats://localhost:4222" });
+        client->connect({ "nats://172.20.73.29:4222" });
         client->publish(Message(subject, data));
     }
     catch (const NatsMq::Exception& exc)

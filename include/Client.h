@@ -2,11 +2,14 @@
 
 #include <future>
 #include <memory>
-#include <optional>
+#include <vector>
 
-#include "Message.h"
+#include "Entities.h"
+#include "Export.h"
 #include "Subscription.h"
-#include "natsmq_export.h"
+#include "SyncSubscription.h"
+
+// TODO cnatc managment: thread pool size and etc
 
 namespace NatsMq
 {
@@ -18,62 +21,76 @@ namespace NatsMq
     public:
         using Urls = std::vector<std::string>;
 
-        static void setThreadPoolSize(int count = 1);
-
         static Client* create();
 
         Client(Connection*);
 
         ~Client();
 
-        Client(const Client&) = default;
+        Client(const Client&);
 
-        Client(Client&&) = default;
+        Client(Client&&);
 
-        Client& operator=(const Client&) = default;
+        Client& operator=(const Client&);
 
-        Client& operator=(Client&&) = default;
+        Client& operator=(Client&&);
 
+        //! Get connection status
         ConnectionStatus connectionStatus() const;
 
-        void setOption(Option option, const OptionValue& val);
+        //! Connect to hosts
+        void connect(const Urls& hosts, const ConnectionOptions& options = {}) const;
 
-        void connect(const Urls& hosts) const;
-
+        //! Disconnect from hosts
         void disconnect() const;
 
-        bool pingServer(int timeout) const noexcept;
+        //! Check hosts access
+        bool ping(int timeout) const noexcept;
 
+        //! Get connection statistics
         IOStatistic statistics() const;
 
-        void publish(const Message& msg) const;
+        //! Publish message
+        void publish(Message msg) const;
 
-        IncomingMessage request(const Message& msg, uint64_t timeoutMs = 2000) const;
+        //! Request data. Request data. If there is no responder, an exception will be thrown
+        Message request(Message msg, uint64_t timeoutMs = 2000) const;
 
-        std::future<IncomingMessage> asyncReuest(const Message& msg, uint64_t timeoutMs = 2000) const;
+        //! Same as request but async
+        std::future<Message> arequest(Message msg, uint64_t timeoutMs = 2000) const;
 
-        Subscription subscribe(const std::string& subject) const;
+        //! Create subscribtion
+        Subscription* subscribe(const std::string& subject, SubscriptionCb cb) const;
 
-        Subscription subscribe(const std::string& subject, const std::string& queueGroup) const;
+        //! Similar as subscribe(subject, callback), but it's temporary subscribtion
+        //! If no message is received by the given timeout (in milliseconds), the message handler is invoked with a empty message.
+        Subscription* subscribe(const std::string& subject, int64_t timeoutMs, SubscriptionCb cb) const;
 
-        JetStream* createJetStream(const JsOptions& options = {}) const;
+        //! Create queue subscribtion. If timeout > 0 then create temporary subscription.
+        //! All subscribers with the same queue name will form the queue group and only one member of the group will be selected to receive any given message
+        Subscription* subscribe(const std::string& subject, const std::string& queueGroup, SubscriptionCb cb) const;
+
+        //! Similar as subscribe(subject, queue, callback), but it's temporary subscribtion.
+        //! If no message is received by the given timeout (in milliseconds), the message handler is invoked with a empty message.
+        Subscription* subscribe(const std::string& subject, const std::string& queueGroup, int64_t timeoutMs, SubscriptionCb cb) const;
+
+        //! Create a synchronous subscription that can be polled via call next() for message recive
+        SyncSubscription* syncSubscribe(const std::string& subject, const std::string& queueGroup = {}) const;
+
+        //! Create jetstream
+        JetStream* jetstream(const Js::Options& options = {}) const;
 
         //! Called all times when connection status changed
-        int registerConnectionCallback(const ConnectionStateCb&) const;
+        int registerConnectionCallback(ConnectionStateCb);
 
-        int registerConnectionCallback(ConnectionStateCb&&) const;
-
+        //! Remove registred callback
         void unregisterConnectionCallback(int idx) const;
 
         //! Called all times when error occured
-        int registerErrorCallback(const ErrorCb&) const;
+        int registerErrorCallback(ErrorCb);
 
-        int registerErrorCallback(ErrorCb&&) const;
-
+        //! Remove registred callback
         void unregisterErrorCallback(int idx) const;
-
-    private:
-        bool isConnected() const;
 
     private:
         std::shared_ptr<Connection> _connection;

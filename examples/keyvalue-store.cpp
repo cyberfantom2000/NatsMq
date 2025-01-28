@@ -4,29 +4,43 @@
 
 using namespace NatsMq;
 
+namespace
+{
+    void deleteStore(Js::KeyValueStore* store)
+    {
+        if (store)
+            store->deleteStore();
+        delete store;
+    }
+
+    using StorePtr = std::unique_ptr<Js::KeyValueStore, decltype(&deleteStore)>;
+}
+
 int main()
 {
+    constexpr auto elementKey{ "new_element" };
+    constexpr auto elementValue{ "new value" };
+
     std::unique_ptr<Client> client(Client::create());
 
     try
     {
-        client->connect({ "nats://localhost:4222" });
+        client->connect({ "nats://172.20.73.29:4222" });
 
-        std::unique_ptr<JetStream> js(client->createJetStream());
+        std::unique_ptr<JetStream> js(client->jetstream());
 
-        KeyValueConfig config;
-        config.name = "example_store";
+        Js::KeyValue::Config config;
+        config.bucket = "example_store";
 
-        const auto store = js->getOrCreateStore(config);
+        StorePtr store(js->getOrCreateKeyValueStore(config), &deleteStore);
 
-        store->putElement("new_element", "new_value");
+        store->put(elementKey, elementValue);
 
-        const auto value = store->getElement("new_element");
-        std::cout << "Value from store: " << value.constData() << std::endl;
+        const auto  value = store->get(elementKey);
+        std::string valStr(reinterpret_cast<const char*>(value.value.data()), value.value.size());
+        std::cout << "Value from store: " << valStr << std::endl;
 
-        store->purgeElement("new_element");
-
-        store->deleteStore();
+        store->purge(elementKey);
     }
     catch (const NatsMq::Exception& exc)
     {

@@ -7,8 +7,8 @@ using namespace NatsMq;
 namespace
 {
     // JsStream not remove the stream on the server
-    auto streamDeleter = [](JsStream* stream) {stream->remove(); delete stream; };
-    using JsStreamPtr  = std::unique_ptr<JsStream, decltype(streamDeleter)>;
+    auto streamDeleter = [](Js::Stream* stream) {stream->remove(); delete stream; };
+    using JsStreamPtr  = std::unique_ptr<Js::Stream, decltype(streamDeleter)>;
 }
 
 int main()
@@ -21,12 +21,12 @@ int main()
 
     try
     {
-        client->connect({ "nats://localhost:4222" });
-        std::unique_ptr<JetStream> js(client->createJetStream());
+        client->connect({ "nats://172.20.73.29:4222" });
+        std::unique_ptr<JetStream> js(client->jetstream());
 
-        JsStreamConfig config;
+        Js::StreamConfig config;
         config.name     = streamName;
-        config.storage  = JsStreamConfig::Storage::Memory;
+        config.storage  = Js::StorageType::Memory;
         config.subjects = { subject };
 
         // stream cannot be used after destroying js object
@@ -34,7 +34,7 @@ int main()
 
         // sync publishing, wait ack
         const auto ack = js->publish(Message(subject, data));
-        std::cout << ack.stream << ack.domain;
+        std::cout << ack.stream << ack.domain << std::endl;
     }
     catch (const NatsMq::Exception& exc)
     {

@@ -2,21 +2,29 @@
 
 #include <memory>
 
-#include "JsKeyValue.h"
-#include "JsStream.h"
-#include "Message.h"
-#include "Subscription.h"
-#include "natsmq_export.h"
+#include "Entities.h"
+#include "Export.h"
 
 namespace NatsMq
 {
     class Connection;
-    class Context;
+
+    namespace Js
+    {
+        class Context;
+        class Stream;
+        class MessageManager;
+        class KeyValueStore;
+        class ObjectStore;
+        class Subscription;
+        class SyncSubscription;
+        class PullSubscription;
+    }
 
     class NATSMQ_EXPORT JetStream
     {
     public:
-        static JetStream* configureAndCreate(std::shared_ptr<Connection> connection, const JsOptions& options);
+        JetStream(std::shared_ptr<Connection> connection, std::unique_ptr<Js::Context> context);
 
         ~JetStream();
 
@@ -24,44 +32,76 @@ namespace NatsMq
 
         JetStream& operator=(JetStream&&);
 
-        JsStream* getOrCreateStream(const JsStreamConfig& config) const;
+        //! Get or create new stream
+        Js::Stream* getOrCreateStream(const Js::StreamConfig& config) const;
 
-        JsStream* getStream(const std::string& name) const;
+        //! Get stream, exception if stream does not exists
+        Js::Stream* getStream(const std::string& name) const;
 
-        KeyValueStore* getOrCreateStore(const KeyValueConfig& config) const;
+        //! Get information about all streams
+        std::vector<Js::StreamInfo> streamsInfo() const;
 
-        KeyValueStore* getStore(const KeyValueConfig& config) const;
+        //! Get all stream names
+        std::vector<std::string> streamNames() const;
 
-        JsPublishAck publish(const Message& msg, const JsPublishOptions& options) const;
+        //! Get or create key-value store
+        Js::KeyValueStore* getOrCreateKeyValueStore(const Js::KeyValue::Config& config) const;
 
-        JsPublishAck publish(const Message& msg, int64_t timeout = 2000) const;
+        //! Get key-value store, exception if store does not exists
+        Js::KeyValueStore* getKeyValueStore(const std::string& bucket) const;
+
+        //! Get or create object store
+        Js::ObjectStore* getOrCreateObjectStore(const Js::ObjectStoreConfig& config) const;
+
+        //! Get object store, exception if store does not exists
+        Js::ObjectStore* getObjectStore(const std::string& bucket) const;
+
+        //! Сreate message manager to work with a raw streams
+        Js::MessageManager* messageManager() const;
+
+        //! Publish message
+        Js::PublishAck publish(Message msg, int64_t timeoutMs = 2000) const;
+
+        //! Publish message
+        Js::PublishAck publish(Message msg, Js::PublishOptions options) const;
+
+        //! Async publish message
+        void apublish(Message msg, int64_t timeoutMs = 2000) const;
+
+        //! Async publish message
+        void apublish(Message msg, Js::PublishOptions options) const;
 
         //! Register a handler to be called when an async publish error occurs.
-        void registerAsyncErrorHandler(const JsAsyncErrorCb& errorHandler) const;
-
-        void registerAsyncErrorHandler(JsAsyncErrorCb&& errorHandler) const;
-
-        void asyncPublish(const Message& msg, int64_t timeout = 2000) const;
-
-        void asyncPublish(const Message& msg, const JsPublishOptions& options) const;
+        void registerAsyncPublishErrorHandler(Js::PublishErrorCb handler);
 
         //! Wait until all asynchronously published messages
-        void waitAsyncPublishCompleted(int64_t timeout = -1) const;
+        void waitAsyncPublishComplete(int64_t timeoutMs = 2000) const;
 
         //! Return ownership all async published messages for which no acknowledgment have been received yet.
-        std::vector<Message> getAsyncPendingMessages() const;
+        std::vector<Message> pendingMessages() const;
 
         //! Сreate a subscription in which you can register a listener and receive auto notifications
-        JsSubscription subscribe(const std::string& stream, const std::string& subject, const std::string& consumer = {}) const;
+        Js::Subscription* subscribe(const std::string& stream, const std::string& subject, JsSubscriptionCb cb) const;
+
+        //! Сreate a subscription in which you can register a listener and receive auto notifications
+        Js::Subscription* subscribe(const std::string& subject, const Js::SubscriptionOptions& options, JsSubscriptionCb) const;
 
         //! Сreate a subscription in which you must request notifications manually
-        JsPullSubscription pullSubscribe(const std::string& stream, const std::string& subject, const std::string& consumer = {}) const;
+        Js::SyncSubscription* syncSubscribe(const std::string& subject, const std::string& stream);
+
+        //! Сreate a subscription in which you must request notifications manually
+        Js::SyncSubscription* syncSubscribe(const std::string& subject, const Js::SubscriptionOptions& options);
+
+        //! Create a pull based subscription. Consumer that does not have a delivery subject,
+        //! that is the library has to request for the messages to be delivered as needed from the server.
+        Js::PullSubscription* pullSubscribe(const std::string& subject, const std::string& stream);
+
+        //! Create a pull based subscription. Consumer that does not have a delivery subject,
+        //! that is the library has to request for the messages to be delivered as needed from the server.
+        Js::PullSubscription* pullSubscribe(const std::string& subject, const Js::SubscriptionOptions& options);
 
     private:
-        JetStream(std::shared_ptr<Connection> connection, std::unique_ptr<Context> context);
-
-    private:
-        std::shared_ptr<Connection> _connection;
-        std::unique_ptr<Context>    _context;
+        std::shared_ptr<Connection>  _connection;
+        std::unique_ptr<Js::Context> _context;
     };
 };

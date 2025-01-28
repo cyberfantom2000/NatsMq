@@ -23,10 +23,14 @@ FetchContent_MakeAvailable(googletest)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Network)
 
-file(GLOB resources "tests/python/SimpleNatsClient.py")
+file(GLOB resources "python/SimpleNatsClient.py")
 file(COPY ${resources} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-file(GLOB test_sources "*.cpp" "*.h")
+file(GLOB test_sources "*.cpp" "*.h"
+                       "core/*.cpp" "core/*.h"
+                       "js/*.cpp" "js/*.h")
+
+
 add_executable(${PROJECT_NAME} ${test_sources})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     gtest_main
@@ -39,5 +43,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
-
 

@@ -4,17 +4,18 @@
 
 #include <memory>
 #include <mutex>
+#include <vector>
 
 #include "Entities.h"
-#include "Options.h"
+
 namespace NatsMq
 {
-    class Options;
-
     class Connection
     {
     public:
-        using Urls = std::vector<std::string>;
+        using Urls              = std::vector<std::string>;
+        using NatsConnectionPtr = std::unique_ptr<natsConnection, decltype(&natsConnection_Destroy)>;
+        using NatsOptionsPtr    = std::unique_ptr<natsOptions, decltype(&natsOptions_Destroy)>;
 
         Connection();
 
@@ -22,31 +23,28 @@ namespace NatsMq
 
         ConnectionStatus status() const;
 
-        void setOption(Option option, const OptionValue& val);
+        void connect(const Urls& hosts, const ConnectionOptions& options);
 
-        //! Нет возможности перенести в конструктор т.к. будет потеряна возможность оповещать о состояниях connecting и connected
-        void connect(const Urls& hosts);
+        void disconnect();
 
-        void disconnect() const;
+        bool ping(int timeout) const noexcept;
 
-        natsConnection* rawConnection() const;
+        IOStatistic statistics() const;
 
-        int registerConnectionCallback(ConnectionStateCb&&);
+        int registerConnectionCallback(ConnectionStateCb cb);
 
-        int registerErrorCallback(ErrorCb&&);
+        int registerErrorCallback(ErrorCb cb);
 
         void unregisterConnectionCallback(int idx);
 
         void unregisterErrorCallback(int idx);
 
+        natsConnection* rawConnection() const;
+
     private:
         void setConnectionHandlers(natsOptions* options);
 
         void setErrorHandler(natsOptions* options);
-
-        void destroyConnection() const;
-
-        void destroyConnectionWithWait() const;
 
         void stateChanged(NatsMq::ConnectionStatus state) const;
 
@@ -56,9 +54,7 @@ namespace NatsMq
         std::vector<ConnectionStateCb> _connectionCallbacks;
         std::vector<ErrorCb>           _errorCallbacks;
 
-        Options         _options;
-        natsConnection* _connection;
-
-        mutable std::mutex _mutex;
+        NatsConnectionPtr _connection;
+        NatsOptionsPtr    _options;
     };
 }

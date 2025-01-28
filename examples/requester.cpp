@@ -14,9 +14,10 @@ int main()
 
     std::unique_ptr<Client> client(Client::create());
 
+    // You must have a registered responder other except NO_RESPONDER_FOUND
     try
     {
-        client->connect({ "nats://localhost:4222" });
+        client->connect({ "nats://172.20.73.29:4222" });
 #ifdef SYNC
         const auto msg = client->request(Message(subject, data), timeoutMs);
 #else
@@ -24,7 +25,7 @@ int main()
 
         const auto msg = futureMsg.get();
 #endif
-        std::cout << msg.data.constData();
+        std::cout << std::string(msg);
     }
     catch (const NatsMq::Exception& exc)
     {

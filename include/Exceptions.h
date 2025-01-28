@@ -3,29 +3,33 @@
 #include <stdexcept>
 
 #include "Entities.h"
-#include "natsmq_export.h"
+#include "Export.h"
 
 namespace NatsMq
 {
+    void NATSMQ_EXPORT exceptionIfError(NatsMq::Status status);
+
     void NATSMQ_EXPORT exceptionIfError(int status);
 
-    void NATSMQ_EXPORT jsExceptionIfError(int status, int error = static_cast<int>(JsError::NoJsError));
+    void NATSMQ_EXPORT jsExceptionIfError(NatsMq::Status status, NatsMq::Js::Status error = Js::Status::NoJsError);
+
+    void NATSMQ_EXPORT jsExceptionIfError(int status, int error = static_cast<int>(Js::Status::NoJsError));
 
     struct NATSMQ_EXPORT Exception : public std::runtime_error
     {
-        Exception(Status);
+        Exception(NatsMq::Status);
 
         Exception(int);
 
-        Status status;
+        NatsMq::Status status;
     };
 
     struct NATSMQ_EXPORT JsException final : public Exception
     {
-        JsException(Status s, JsError e);
+        JsException(NatsMq::Status s, Js::Status e);
 
         JsException(int s, int e);
 
-        JsError jsError;
+        Js::Status jsError;
     };
 }

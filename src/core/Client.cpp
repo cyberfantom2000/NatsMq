@@ -1,139 +1,140 @@
 #include "Client.h"
 
-#include "Connection.h"
 #include "JetStream.h"
-#include "MessageImpl.h"
-#include "Publisher.h"
-#include "Request.h"
-#include "Statistics.h"
-#include "SubscriptionImpl.h"
-#include "Utils.h"
-#include "versioncontrol.h"
+#include "Message.h"
+#include "core/Connection.h"
+#include "core/Publisher.h"
+#include "core/Requestor.h"
+#include "core/SubscriptionPrivate.h"
+#include "core/SyncSubscriptionPrivate.h"
+#include "js/Context.h"
+#include "private/versioncontrol.h"
 
-namespace
-{
-    using NatsSubPtr = std::unique_ptr<natsSubscription, decltype(&natsSubscription_Destroy)>;
-    using NatsMsgPtr = std::unique_ptr<natsMsg, decltype(&natsMsg_Destroy)>;
-}
+using namespace NatsMq;
 
-void NatsMq::Client::setThreadPoolSize(int count)
-{
-    configurePoolSize(count);
-}
-
-NatsMq::Client* NatsMq::Client::create()
+Client* Client::create()
 {
     const auto connection = new Connection();
     return new Client(connection);
 }
 
-NatsMq::Client::Client(Connection* connection)
+Client::Client(Connection* connection)
     : _connection(connection)
 {
     staticCheckEnumIntegrity();
 }
 
-NatsMq::Client::~Client() = default;
+Client::~Client() = default;
 
-NatsMq::ConnectionStatus NatsMq::Client::connectionStatus() const
+Client::Client(const Client&) = default;
+
+Client::Client(Client&&) = default;
+
+Client& Client::operator=(const Client&) = default;
+
+Client& Client::operator=(Client&&) = default;
+
+ConnectionStatus Client::connectionStatus() const
 {
     return _connection->status();
 }
 
-void NatsMq::Client::setOption(Option option, const OptionValue& val)
+void Client::connect(const Urls& hosts, const ConnectionOptions& options) const
 {
-    _connection->setOption(option, val);
-}
-
-void NatsMq::Client::connect(const Urls& hosts) const
-{
-    if (isConnected())
+    if (connectionStatus() == ConnectionStatus::Connected)
         disconnect();
 
-    _connection->connect(hosts);
+    _connection->connect(hosts, options);
 }
 
-void NatsMq::Client::disconnect() const
+void Client::disconnect() const
 {
     _connection->disconnect();
 }
 
-bool NatsMq::Client::pingServer(int timeout) const noexcept
+bool Client::ping(int timeout) const noexcept
 {
-    return makePing(_connection->rawConnection(), timeout);
+    return _connection->ping(timeout);
 }
 
-NatsMq::IOStatistic NatsMq::Client::statistics() const
+IOStatistic Client::statistics() const
 {
-    return Statistics::get(_connection->rawConnection());
+    return _connection->statistics();
 }
 
-void NatsMq::Client::publish(const Message& msg) const
+void Client::publish(Message msg) const
 {
     Publisher publisher(_connection->rawConnection());
-    publisher.puslish(msg);
+    publisher.publish(std::move(msg));
 }
 
-NatsMq::IncomingMessage NatsMq::Client::request(const Message& msg, uint64_t timeoutMs) const
+Message Client::request(Message msg, uint64_t timeoutMs) const
 {
-    Request request(_connection->rawConnection());
-    return request.make(msg, timeoutMs);
+    Requestor requestor(_connection->rawConnection());
+    return requestor.request(std::move(msg), timeoutMs);
 }
 
-std::future<NatsMq::IncomingMessage> NatsMq::Client::asyncReuest(const Message& msg, uint64_t timeoutMs) const
+std::future<Message> Client::arequest(Message msg, uint64_t timeoutMs) const
 {
-    Request request(_connection->rawConnection());
-    return request.asyncMake(msg, timeoutMs);
+    Requestor requestor(_connection->rawConnection());
+    return requestor.arequest(std::move(msg), timeoutMs);
 }
 
-NatsMq::Subscription NatsMq::Client::subscribe(const std::string& subject) const
+Subscription* Client::subscribe(const std::string& subject, SubscriptionCb cb) const
 {
-    auto privateSub = SubscriptionImpl::create(_connection->rawConnection(), subject);
-    return Subscription(privateSub);
+    auto impl = new SubscriptionPrivate(_connection->rawConnection(), subject);
+    impl->registerListener(std::move(cb));
+    return new Subscription(impl);
 }
 
-NatsMq::Subscription NatsMq::Client::subscribe(const std::string& subject, const std::string& queueGroup) const
+Subscription* Client::subscribe(const std::string& subject, int64_t timeoutMs, SubscriptionCb cb) const
 {
-    auto privateSub = SubscriptionImpl::create(_connection->rawConnection(), subject, queueGroup);
-    return Subscription(privateSub);
+    auto impl = new SubscriptionPrivate(_connection->rawConnection(), subject, timeoutMs);
+    impl->registerListener(std::move(cb));
+    return new Subscription(impl);
 }
 
-NatsMq::JetStream* NatsMq::Client::createJetStream(const JsOptions& options) const
+Subscription* Client::subscribe(const std::string& subject, const std::string& queue, SubscriptionCb cb) const
 {
-    return JetStream::configureAndCreate(_connection, options);
+    auto impl = new SubscriptionPrivate(_connection->rawConnection(), subject, queue);
+    impl->registerListener(std::move(cb));
+    return new Subscription(impl);
 }
 
-int NatsMq::Client::registerConnectionCallback(const ConnectionStateCb& cb) const
+Subscription* Client::subscribe(const std::string& subject, const std::string& queue, int64_t timeoutMs, SubscriptionCb cb) const
 {
-    return _connection->registerConnectionCallback(ConnectionStateCb(cb));
+    auto impl = new SubscriptionPrivate(_connection->rawConnection(), subject, queue, timeoutMs);
+    impl->registerListener(std::move(cb));
+    return new Subscription(impl);
 }
 
-int NatsMq::Client::registerConnectionCallback(ConnectionStateCb&& cb) const
+SyncSubscription* Client::syncSubscribe(const std::string& subject, const std::string& queue) const
+{
+    return new SyncSubscription(queue.empty() ? new SyncSubscriptionPrivate(_connection->rawConnection(), subject) : new SyncSubscriptionPrivate(_connection->rawConnection(), subject, queue));
+}
+
+JetStream* Client::jetstream(const Js::Options& options) const
+{
+    auto context = std::make_unique<Js::Context>(_connection->rawConnection(), options);
+    return new JetStream(_connection, std::move(context));
+}
+
+int Client::registerConnectionCallback(ConnectionStateCb cb)
 {
     return _connection->registerConnectionCallback(std::move(cb));
 }
 
-void NatsMq::Client::unregisterConnectionCallback(int idx) const
+void Client::unregisterConnectionCallback(int idx) const
 {
     _connection->unregisterConnectionCallback(idx);
 }
 
-int NatsMq::Client::registerErrorCallback(const ErrorCb& cb) const
-{
-    return _connection->registerErrorCallback(ErrorCb(cb));
-}
-
-int NatsMq::Client::registerErrorCallback(ErrorCb&& cb) const
+int Client::registerErrorCallback(ErrorCb cb)
 {
     return _connection->registerErrorCallback(std::move(cb));
 }
 
-void NatsMq::Client::unregisterErrorCallback(int idx) const
+void Client::unregisterErrorCallback(int idx) const
 {
     _connection->unregisterErrorCallback(idx);
-}
-
-bool NatsMq::Client::isConnected() const
-{
-    return connectionStatus() == ConnectionStatus::Connected;
 }
